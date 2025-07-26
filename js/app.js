@@ -7,23 +7,22 @@ class ChatBot {
     async waitForAuth() {
         // Esperar hasta que Firebase esté inicializado y tengamos un usuario
         firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                this.initializeApp();
-            }
+            this.currentUser = user;
+            this.initializeApp();
         });
     }
 
     initializeApp() {
-        // Configuración persistente con Firebase
+        // Configuración persistente con localStorage y Firebase
         this.apiKey = '';
         this.selectedModel = 'google/gemma-2-9b-it:free';
         
-        // Cargar desde variables globales si existen (cargadas de Firebase)
-        if (window.loadedApiKey) {
-            this.apiKey = window.loadedApiKey;
-        }
-        if (window.loadedModel) {
-            this.selectedModel = window.loadedModel;
+        // Cargar configuración desde localStorage primero
+        this.loadSettingsFromLocalStorage();
+        
+        // Si hay usuario logueado, cargar/sincronizar desde Firebase
+        if (this.currentUser) {
+            this.loadSettingsFromFirebase();
         }
         
         // MEMORIA EN VARIABLES - Solo durante la sesión actual
@@ -35,6 +34,81 @@ class ChatBot {
         this.setupEventListeners();
         this.loadMessages();
         this.updateUI();
+    }
+
+    // NUEVO: Cargar configuración desde localStorage
+    loadSettingsFromLocalStorage() {
+        try {
+            const savedApiKey = localStorage.getItem('chatbot_api_key');
+            const savedModel = localStorage.getItem('chatbot_selected_model');
+            
+            if (savedApiKey) {
+                this.apiKey = savedApiKey;
+                console.log('✅ API Key cargada desde localStorage');
+            }
+            
+            if (savedModel) {
+                this.selectedModel = savedModel;
+                console.log('✅ Modelo cargado desde localStorage:', savedModel);
+            }
+        } catch (error) {
+            console.warn('⚠️ Error cargando desde localStorage:', error);
+        }
+    }
+
+    // NUEVO: Cargar configuración desde Firebase (sobrescribe localStorage si existe)
+    async loadSettingsFromFirebase() {
+        try {
+            if (window.loadedApiKey) {
+                this.apiKey = window.loadedApiKey;
+                // Sincronizar con localStorage
+                localStorage.setItem('chatbot_api_key', this.apiKey);
+                console.log('✅ API Key cargada desde Firebase y sincronizada con localStorage');
+            }
+            
+            if (window.loadedModel) {
+                this.selectedModel = window.loadedModel;
+                // Sincronizar con localStorage
+                localStorage.setItem('chatbot_selected_model', this.selectedModel);
+                console.log('✅ Modelo cargado desde Firebase y sincronizado con localStorage');
+            }
+        } catch (error) {
+            console.warn('⚠️ Error cargando desde Firebase:', error);
+        }
+    }
+
+    // NUEVO: Guardar configuración en localStorage
+    saveSettingsToLocalStorage() {
+        try {
+            localStorage.setItem('chatbot_api_key', this.apiKey);
+            localStorage.setItem('chatbot_selected_model', this.selectedModel);
+            console.log('✅ Configuración guardada en localStorage');
+        } catch (error) {
+            console.error('❌ Error guardando en localStorage:', error);
+        }
+    }
+
+    // NUEVO: Guardar configuración en Firebase
+    async saveSettingsToFirebase() {
+        try {
+            if (this.currentUser && window.saveUserData) {
+                await window.saveUserData(this.apiKey, this.selectedModel);
+                console.log('✅ Configuración guardada en Firebase');
+            }
+        } catch (error) {
+            console.error('❌ Error guardando en Firebase:', error);
+        }
+    }
+
+    // NUEVO: Limpiar configuración de localStorage
+    clearLocalStorageSettings() {
+        try {
+            localStorage.removeItem('chatbot_api_key');
+            localStorage.removeItem('chatbot_selected_model');
+            console.log('🗑️ Configuración eliminada de localStorage');
+        } catch (error) {
+            console.error('❌ Error limpiando localStorage:', error);
+        }
     }
 
     initializeElements() {
@@ -78,13 +152,32 @@ class ChatBot {
         this.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
     }
 
-    saveSettings() {
-        this.apiKey = this.apiKeyInput.value.trim();
-        this.selectedModel = this.modelSelect.value;
+    // MODIFICADO: Ahora guarda en ambos sitios
+    async saveSettings() {
+        const newApiKey = this.apiKeyInput.value.trim();
+        const newModel = this.modelSelect.value;
+        
+        // Solo actualizar si hay cambios
+        const hasChanges = (newApiKey !== this.apiKey) || (newModel !== this.selectedModel);
+        
+        this.apiKey = newApiKey;
+        this.selectedModel = newModel;
 
-        // Guardar en Firebase si el usuario está logueado
-        if (window.saveUserData) {
-            window.saveUserData(this.apiKey, this.selectedModel);
+        if (hasChanges) {
+            // Guardar en localStorage siempre
+            this.saveSettingsToLocalStorage();
+            
+            // Guardar en Firebase si hay usuario logueado
+            if (this.currentUser) {
+                await this.saveSettingsToFirebase();
+            }
+            
+            console.log('💾 Configuración guardada:', {
+                localStorage: true,
+                firebase: !!this.currentUser,
+                apiKey: this.apiKey ? '***configurada***' : 'vacía',
+                model: this.selectedModel
+            });
         }
 
         this.settingsModal.style.display = 'none';
@@ -288,8 +381,6 @@ Aura: "Para nada eres un fracaso. Tu mente está en modo autocrítica extrema ah
             this.displayMessage(botMessage, 'assistant');
             this.messages.push({ role: 'assistant', content: botMessage });
 
-            // YA NO guardamos en localStorage - solo en memoria
-
         } catch (error) {
             this.hideTyping();
             console.error('Error:', error);
@@ -315,13 +406,51 @@ Aura: "Para nada eres un fracaso. Tu mente está en modo autocrítica extrema ah
             this.displayWelcomeMessage();
         }
     }
+
+    // NUEVO: Método para gestión completa de configuración
+    async resetSettings() {
+        this.apiKey = '';
+        this.selectedModel = 'google/gemma-2-9b-it:free';
+        
+        // Limpiar localStorage
+        this.clearLocalStorageSettings();
+        
+        // Si hay usuario, también limpiar Firebase
+        if (this.currentUser) {
+            await this.saveSettingsToFirebase();
+        }
+        
+        this.updateUI();
+        console.log('🔄 Configuración restablecida');
+    }
+
+    // NUEVO: Obtener información del almacenamiento actual
+    getStorageInfo() {
+        const info = {
+            localStorage: {
+                apiKey: !!localStorage.getItem('chatbot_api_key'),
+                model: localStorage.getItem('chatbot_selected_model') || 'no configurado'
+            },
+            firebase: {
+                connected: !!this.currentUser,
+                user: this.currentUser?.email || 'no logueado'
+            },
+            current: {
+                apiKey: !!this.apiKey,
+                model: this.selectedModel
+            }
+        };
+        
+        console.log('📊 Estado del almacenamiento:', info);
+        return info;
+    }
 }
 
 // Inicializar la aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     // Solo inicializar si no estamos esperando autenticación
     if (document.getElementById('app-container').style.display !== 'none') {
-        new ChatBot();
+        window.chatBot = new ChatBot(); // Hacer accesible globalmente para debug
     } else {
         // Esperar a que se complete la autenticación
         const observer = new MutationObserver((mutations) => {
@@ -329,7 +458,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                     const appContainer = document.getElementById('app-container');
                     if (appContainer.style.display !== 'none') {
-                        new ChatBot();
+                        window.chatBot = new ChatBot(); // Hacer accesible globalmente para debug
                         observer.disconnect();
                     }
                 }

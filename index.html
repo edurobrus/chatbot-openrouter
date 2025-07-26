@@ -14,8 +14,17 @@
     <script src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
-    <!-- Pantalla de Login -->
-    <div id="auth-container" class="auth-container">
+    <!-- Pantalla de Loading inicial -->
+    <div id="loading-container" class="loading-container">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>🌸 Aura</p>
+            <small>Cargando...</small>
+        </div>
+    </div>
+
+    <!-- Pantalla de Login (oculta inicialmente) -->
+    <div id="auth-container" class="auth-container" style="display: none;">
         <div class="auth-card">
             <div class="auth-header">
                 <h1>🌸 Aura</h1>
@@ -56,7 +65,6 @@
         <header>
             <div class="header-left">
                 <h1 style="color: #333;">🌸 Aura</h1>
-
             </div>
             <div class="header-right">
                 <div id="user-info" class="user-info">
@@ -65,7 +73,6 @@
                 </div>
                 <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
                 <button id="settings-btn" class="settings-btn">⚙️</button>
-                
             </div>
         </header>
 
@@ -117,7 +124,6 @@
             measurementId: "G-HMW3QX4G4V"
         };
 
-
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
@@ -125,6 +131,7 @@
 
         // Variables globales
         let currentUser = null;
+        let authInitialized = false;
 
         // Configurar proveedor de Google
         const googleProvider = new firebase.auth.GoogleAuthProvider();
@@ -132,6 +139,7 @@
         googleProvider.addScope('email');
 
         // Referencias a elementos
+        const loadingContainer = document.getElementById('loading-container');
         const authContainer = document.getElementById('auth-container');
         const appContainer = document.getElementById('app-container');
         const googleLoginBtn = document.getElementById('google-login-btn');
@@ -141,10 +149,62 @@
         const userName = document.getElementById('user-name');
         const userInfo = document.getElementById('user-info');
 
-        // Event Listeners
-        googleLoginBtn.addEventListener('click', signInWithGoogle);
-        anonymousBtn.addEventListener('click', signInAnonymously);
-        logoutBtn.addEventListener('click', logout);
+        // NUEVO: Función para mostrar loading
+        function showLoading() {
+            loadingContainer.style.display = 'flex';
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'none';
+        }
+
+        // MODIFICADO: Función para mostrar app con transición suave
+        function showApp() {
+            loadingContainer.style.display = 'none';
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'block';
+            
+            // Mostrar info del usuario
+            if (currentUser.isAnonymous) {
+                userInfo.style.display = 'none';
+                userName.textContent = 'Invitado';
+            } else {
+                userInfo.style.display = 'flex';
+                userAvatar.src = currentUser.photoURL || 'https://via.placeholder.com/32';
+                userName.textContent = currentUser.displayName || 'Usuario';
+            }
+        }
+
+        // MODIFICADO: Función para mostrar auth con transición suave
+        function showAuth() {
+            loadingContainer.style.display = 'none';
+            authContainer.style.display = 'flex';
+            appContainer.style.display = 'none';
+            
+            // Resetear botones
+            resetAuthButtons();
+        }
+
+        // NUEVO: Función para resetear botones de auth
+        function resetAuthButtons() {
+            googleLoginBtn.disabled = false;
+            googleLoginBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continuar con Google
+            `;
+            anonymousBtn.disabled = false;
+            anonymousBtn.innerHTML = 'Continuar como invitado';
+        }
+
+        // Event Listeners - Solo configurar después de que Firebase esté listo
+        function setupEventListeners() {
+            googleLoginBtn.addEventListener('click', signInWithGoogle);
+            anonymousBtn.addEventListener('click', signInAnonymously);
+            logoutBtn.addEventListener('click', logout);
+        }
 
         // Funciones de autenticación
         async function signInWithGoogle() {
@@ -157,16 +217,7 @@
             } catch (error) {
                 console.error('Error en login:', error);
                 alert('Error al iniciar sesión: ' + error.message);
-                googleLoginBtn.disabled = false;
-                googleLoginBtn.innerHTML = `
-                    <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    Continuar con Google
-                `;
+                resetAuthButtons();
             }
         }
 
@@ -180,13 +231,15 @@
             } catch (error) {
                 console.error('Error en login anónimo:', error);
                 alert('Error al iniciar sesión: ' + error.message);
-                anonymousBtn.disabled = false;
-                anonymousBtn.innerHTML = 'Continuar como invitado';
+                resetAuthButtons();
             }
         }
 
         async function logout() {
             try {
+                // Mostrar loading durante logout
+                showLoading();
+                
                 // Cerrar sesión de Firebase
                 await auth.signOut();
                 
@@ -207,51 +260,31 @@
             }
         }
 
-        // Observador de estado de autenticación
+        // MODIFICADO: Observador de estado de autenticación con mejor manejo
         auth.onAuthStateChanged(async (user) => {
+            console.log('🔐 Auth state changed:', user ? 'User logged in' : 'No user');
+            
             if (user) {
                 currentUser = user;
-                showApp();
                 await loadUserData();
+                showApp();
             } else {
-                showAuth();
                 currentUser = null;
+                // Solo mostrar auth si ya se inicializó Firebase
+                if (authInitialized) {
+                    showAuth();
+                }
+            }
+            
+            // Marcar que Firebase ya se inicializó
+            if (!authInitialized) {
+                authInitialized = true;
+                // Si no hay usuario después de la inicialización, mostrar auth
+                if (!user) {
+                    showAuth();
+                }
             }
         });
-
-        function showApp() {
-            authContainer.style.display = 'none';
-            appContainer.style.display = 'block';
-            
-            // Mostrar info del usuario
-            if (currentUser.isAnonymous) {
-                userInfo.style.display = 'none';
-                userName.textContent = 'Invitado';
-            } else {
-                userInfo.style.display = 'flex';
-                userAvatar.src = currentUser.photoURL || 'https://via.placeholder.com/32';
-                userName.textContent = currentUser.displayName || 'Usuario';
-            }
-        }
-
-        function showAuth() {
-            authContainer.style.display = 'flex';
-            appContainer.style.display = 'none';
-            
-            // Resetear botones
-            googleLoginBtn.disabled = false;
-            googleLoginBtn.innerHTML = `
-                <svg width="20" height="20" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continuar con Google
-            `;
-            anonymousBtn.disabled = false;
-            anonymousBtn.innerHTML = 'Continuar como invitado';
-        }
 
         // Funciones de base de datos
         async function loadUserData() {
@@ -295,19 +328,87 @@
         // Hacer funciones disponibles globalmente para el ChatBot
         window.saveUserData = saveUserData;
         window.getCurrentUser = () => currentUser;
+
+        // NUEVO: Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM loaded, showing loading screen...');
+            showLoading();
+            setupEventListeners();
+            
+            // Timeout de seguridad en caso de que Firebase tarde mucho
+            setTimeout(() => {
+                if (!authInitialized) {
+                    console.warn('⚠️ Firebase tardando mucho, mostrando auth...');
+                    authInitialized = true;
+                    showAuth();
+                }
+            }, 5000); // 5 segundos máximo de loading
+        });
     </script>
     
     <script src="js/app.js"></script>
 
     <style>
-        /* Estilos para autenticación */
-        .auth-container {
+        /* NUEVO: Estilos para pantalla de loading */
+        .loading-container {
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background:rgb(121, 121, 177)
+            background: rgb(121, 121, 177);
             padding: 20px;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-spinner p {
+            font-size: 2em;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+
+        .loading-spinner small {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+
+        /* Estilos para autenticación */
+        .auth-container {
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: rgb(121, 121, 177);
+            padding: 20px;
+            /* MODIFICADO: Agregar transición suave */
+            opacity: 0;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        .auth-container[style*="flex"] {
+            display: flex !important;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .auth-card {
@@ -318,6 +419,15 @@
             width: 100%;
             box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             text-align: center;
+            /* NUEVO: Animación de entrada */
+            transform: translateY(20px);
+            animation: slideUp 0.4s ease-out 0.1s forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+            }
         }
 
         .auth-header h1 {
@@ -362,9 +472,15 @@
             border: 2px solid #ddd;
         }
 
-        .google-btn:hover {
+        .google-btn:hover:not(:disabled) {
             background: #f8f9fa;
             transform: translateY(-2px);
+        }
+
+        .google-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .anonymous-btn {
@@ -372,9 +488,15 @@
             color: white;
         }
 
-        .anonymous-btn:hover {
+        .anonymous-btn:hover:not(:disabled) {
             background: #5a6fd8;
             transform: translateY(-2px);
+        }
+
+        .anonymous-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
         }
 
         .auth-divider {
@@ -410,6 +532,20 @@
             margin: 0;
         }
 
+        /* MODIFICADO: App container con animación */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding-top: 70px;
+            opacity: 0;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        .container[style*="block"] {
+            display: flex !important;
+        }
+
         /* Estilos para header con usuario */
         header {
             display: flex;
@@ -425,21 +561,13 @@
             z-index: 1000;
         }
 
-        /* Contenedor principal ajustado */
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            padding-top: 70px; /* Espacio para header fijo */
-        }
-
         /* Chat container ajustado */
         #chat-container {
             flex: 1;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            padding-bottom: 120px; /* Espacio para input fijo */
+            padding-bottom: 120px;
         }
 
         #messages {
