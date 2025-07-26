@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: blue;
+    background: rgb(121, 121, 177);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -27,7 +27,7 @@ body {
 }
 
 header {
-    background: blue;
+    background: rgb(121, 121, 177);
     color: white;
     padding: 20px;
     text-align: center;
@@ -196,7 +196,7 @@ header h1 {
 }
 
 #save-settings {
-    background: blue;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
     padding: 12px 30px;
