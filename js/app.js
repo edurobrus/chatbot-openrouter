@@ -1,8 +1,30 @@
 class ChatBot {
     constructor() {
-        // Configuración persistente (seguimos usando localStorage para settings)
-        this.apiKey = localStorage.getItem('openrouter_api_key') || '';
-        this.selectedModel = localStorage.getItem('selected_model') || 'google/gemma-2-9b-it:free';
+        // Esperar a que Firebase esté listo
+        this.waitForAuth();
+    }
+
+    async waitForAuth() {
+        // Esperar hasta que Firebase esté inicializado y tengamos un usuario
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                this.initializeApp();
+            }
+        });
+    }
+
+    initializeApp() {
+        // Configuración persistente con Firebase
+        this.apiKey = '';
+        this.selectedModel = 'google/gemma-2-9b-it:free';
+        
+        // Cargar desde variables globales si existen (cargadas de Firebase)
+        if (window.loadedApiKey) {
+            this.apiKey = window.loadedApiKey;
+        }
+        if (window.loadedModel) {
+            this.selectedModel = window.loadedModel;
+        }
         
         // MEMORIA EN VARIABLES - Solo durante la sesión actual
         this.messages = [];
@@ -60,8 +82,10 @@ class ChatBot {
         this.apiKey = this.apiKeyInput.value.trim();
         this.selectedModel = this.modelSelect.value;
 
-        localStorage.setItem('openrouter_api_key', this.apiKey);
-        localStorage.setItem('selected_model', this.selectedModel);
+        // Guardar en Firebase si el usuario está logueado
+        if (window.saveUserData) {
+            window.saveUserData(this.apiKey, this.selectedModel);
+        }
 
         this.settingsModal.style.display = 'none';
         this.updateUI();
@@ -295,5 +319,26 @@ Aura: "Para nada eres un fracaso. Tu mente está en modo autocrítica extrema ah
 
 // Inicializar la aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    new ChatBot();
+    // Solo inicializar si no estamos esperando autenticación
+    if (document.getElementById('app-container').style.display !== 'none') {
+        new ChatBot();
+    } else {
+        // Esperar a que se complete la autenticación
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    const appContainer = document.getElementById('app-container');
+                    if (appContainer.style.display !== 'none') {
+                        new ChatBot();
+                        observer.disconnect();
+                    }
+                }
+            });
+        });
+        
+        observer.observe(document.getElementById('app-container'), {
+            attributes: true,
+            attributeFilter: ['style']
+        });
+    }
 });
