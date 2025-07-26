@@ -73,7 +73,7 @@
                     <img id="user-avatar" class="user-avatar" src="" alt="">
                     <span style="color: #333;" id="user-name"></span>
                 </div>
-                <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
+                <button id="logout-btn" class="logout-btn">Log out</button>
                 <button id="settings-btn" class="settings-btn">⚙️</button>
             </div>
         </header>
@@ -721,8 +721,8 @@
             object-fit: cover;
         }
 
-        .logout-btn, .settings-btn {
-            background: #dc3545;
+        .settings-btn {
+            background: #ea848e;
             color: white;
             border: none;
             padding: 8px 12px;
@@ -731,13 +731,24 @@
             font-size: 16px;
             transition: all 0.3s ease;
         }
+        .logout-btn {
+            background: rgba(199, 103, 103, 0.2); /* más transparente */
+            color: #555; /* gris oscuro en lugar de blanco */
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500; /* menos negrita */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .logout-btn:hover {
+            background: rgba(199, 103, 103, 0.3); /* un poco más visible al pasar el mouse */
+        }
+                
 
         .settings-btn {
             background: #6c757d;
-        }
-
-        .logout-btn:hover {
-            background: #c82333;
         }
 
         .settings-btn:hover {
