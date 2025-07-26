@@ -5,12 +5,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ChatBot AI</title>
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <div class="container">
+    <!-- Pantalla de Login -->
+    <div id="auth-container" class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🌸 Aura</h1>
+                <p>Tu compañía empática siempre disponible</p>
+            </div>
+            
+            <div class="auth-content">
+                <h2>Bienvenido/a</h2>
+                <p>Inicia sesión para comenzar tu conversación</p>
+                
+                <button id="google-login-btn" class="google-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continuar con Google
+                </button>
+                
+                <div class="auth-divider">
+                    <span>o</span>
+                </div>
+                
+                <button id="anonymous-btn" class="anonymous-btn">
+                    Continuar como invitado
+                </button>
+            </div>
+            
+            <div class="auth-footer">
+                <p>Al continuar, aceptas nuestros términos de servicio</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aplicación Principal (oculta inicialmente) -->
+    <div id="app-container" class="container" style="display: none;">
         <header>
-            <h1>🤖 ChatBot AI</h1>
-            <button id="settings-btn" class="settings-btn">⚙️</button>
+            <div class="header-left">
+                <h1>🌸 Aura</h1>
+            </div>
+            <div class="header-right">
+                <div id="user-info" class="user-info">
+                    <img id="user-avatar" class="user-avatar" src="" alt="">
+                    <span id="user-name"></span>
+                </div>
+                <button id="settings-btn" class="settings-btn">⚙️</button>
+                <button id="logout-btn" class="logout-btn">🚪</button>
+            </div>
         </header>
 
         <div id="settings-modal" class="modal">
@@ -20,6 +72,7 @@
                 <div class="form-group">
                     <label for="api-key">OpenRouter API Key:</label>
                     <input type="password" id="api-key" placeholder="Ingresa tu API key de OpenRouter">
+                    <small>Tus datos se guardan de forma segura en tu cuenta</small>
                 </div>
                 <div class="form-group">
                     <label for="model-select">Modelo:</label>
@@ -43,6 +96,343 @@
         <div id="status">⚠️ Configura tu API key para empezar</div>
     </div>
 
+    <script>
+        // Configuración de Firebase (REEMPLAZA CON TUS DATOS)
+       const firebaseConfig = {
+            apiKey: "AIzaSyDhk87l2Zms8mT80__bAZA56825C7yoxQo",
+            authDomain: "fir-auth-46398.firebaseapp.com",
+            projectId: "fir-auth-46398",
+            storageBucket: "fir-auth-46398.appspot.com",
+            messagingSenderId: "413507602598",
+            appId: "1:413507602598:web:0e56b0d5df3aa4767a4c67",
+            measurementId: "G-HMW3QX4G4V"
+        };
+
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Variables globales
+        let currentUser = null;
+
+        // Configurar proveedor de Google
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+        googleProvider.addScope('profile');
+        googleProvider.addScope('email');
+
+        // Referencias a elementos
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const anonymousBtn = document.getElementById('anonymous-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name');
+        const userInfo = document.getElementById('user-info');
+
+        // Event Listeners
+        googleLoginBtn.addEventListener('click', signInWithGoogle);
+        anonymousBtn.addEventListener('click', signInAnonymously);
+        logoutBtn.addEventListener('click', logout);
+
+        // Funciones de autenticación
+        async function signInWithGoogle() {
+            try {
+                googleLoginBtn.disabled = true;
+                googleLoginBtn.innerHTML = 'Conectando...';
+                
+                const result = await auth.signInWithPopup(googleProvider);
+                console.log('Login exitoso:', result.user);
+            } catch (error) {
+                console.error('Error en login:', error);
+                alert('Error al iniciar sesión: ' + error.message);
+                googleLoginBtn.disabled = false;
+                googleLoginBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continuar con Google
+                `;
+            }
+        }
+
+        async function signInAnonymously() {
+            try {
+                anonymousBtn.disabled = true;
+                anonymousBtn.innerHTML = 'Conectando...';
+                
+                const result = await auth.signInAnonymously();
+                console.log('Login anónimo exitoso:', result.user);
+            } catch (error) {
+                console.error('Error en login anónimo:', error);
+                alert('Error al iniciar sesión: ' + error.message);
+                anonymousBtn.disabled = false;
+                anonymousBtn.innerHTML = 'Continuar como invitado';
+            }
+        }
+
+        async function logout() {
+            try {
+                await auth.signOut();
+                console.log('Logout exitoso');
+            } catch (error) {
+                console.error('Error en logout:', error);
+            }
+        }
+
+        // Observador de estado de autenticación
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                showApp();
+                await loadUserData();
+            } else {
+                showAuth();
+                currentUser = null;
+            }
+        });
+
+        function showApp() {
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'block';
+            
+            // Mostrar info del usuario
+            if (currentUser.isAnonymous) {
+                userInfo.style.display = 'none';
+                userName.textContent = 'Invitado';
+            } else {
+                userInfo.style.display = 'flex';
+                userAvatar.src = currentUser.photoURL || 'https://via.placeholder.com/32';
+                userName.textContent = currentUser.displayName || 'Usuario';
+            }
+        }
+
+        function showAuth() {
+            authContainer.style.display = 'flex';
+            appContainer.style.display = 'none';
+            
+            // Resetear botones
+            googleLoginBtn.disabled = false;
+            googleLoginBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continuar con Google
+            `;
+            anonymousBtn.disabled = false;
+            anonymousBtn.innerHTML = 'Continuar como invitado';
+        }
+
+        // Funciones de base de datos
+        async function loadUserData() {
+            if (!currentUser || currentUser.isAnonymous) return;
+            
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    // Cargar API key si existe
+                    if (data.apiKey) {
+                        document.getElementById('api-key').value = data.apiKey;
+                        // Disparar evento para que el ChatBot se actualice
+                        window.loadedApiKey = data.apiKey;
+                    }
+                    if (data.selectedModel) {
+                        document.getElementById('model-select').value = data.selectedModel;
+                        window.loadedModel = data.selectedModel;
+                    }
+                }
+            } catch (error) {
+                console.error('Error cargando datos del usuario:', error);
+            }
+        }
+
+        async function saveUserData(apiKey, selectedModel) {
+            if (!currentUser || currentUser.isAnonymous) return;
+            
+            try {
+                await db.collection('users').doc(currentUser.uid).set({
+                    apiKey: apiKey,
+                    selectedModel: selectedModel,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log('Datos guardados en Firebase');
+            } catch (error) {
+                console.error('Error guardando datos:', error);
+            }
+        }
+
+        // Hacer funciones disponibles globalmente para el ChatBot
+        window.saveUserData = saveUserData;
+        window.getCurrentUser = () => currentUser;
+    </script>
+    
     <script src="js/app.js"></script>
+
+    <style>
+        /* Estilos para autenticación */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .auth-header h1 {
+            font-size: 2.5em;
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+
+        .auth-header p {
+            color: #666;
+            margin: 0 0 30px 0;
+        }
+
+        .auth-content h2 {
+            color: #333;
+            margin: 0 0 10px 0;
+        }
+
+        .auth-content p {
+            color: #666;
+            margin: 0 0 30px 0;
+        }
+
+        .google-btn, .anonymous-btn {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .google-btn {
+            background: white;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .google-btn:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .anonymous-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .anonymous-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .auth-divider {
+            margin: 20px 0;
+            position: relative;
+            color: #999;
+        }
+
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .auth-divider span {
+            background: white;
+            padding: 0 15px;
+        }
+
+        .auth-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .auth-footer p {
+            font-size: 12px;
+            color: #999;
+            margin: 0;
+        }
+
+        /* Estilos para header con usuario */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 20px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+    </style>
 </body>
 </html>
