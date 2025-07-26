@@ -1,7 +1,7 @@
 class ChatBot {
     constructor() {
         this.apiKey = localStorage.getItem('openrouter_api_key') || '';
-        this.selectedModel = localStorage.getItem('selected_model') || 'anthropic/claude-3.5-sonnet';
+        this.selectedModel = localStorage.getItem('selected_model') || 'google/gemma-2-9b-it:free';
         this.messages = JSON.parse(localStorage.getItem('chat_messages')) || [];
         this.baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
         this.initializeElements();
@@ -74,10 +74,7 @@ class ChatBot {
 
     getModelName() {
         const modelNames = {
-            'anthropic/claude-3.5-sonnet': 'Claude 3.5 Sonnet',
-            'openai/gpt-4o': 'GPT-4o',
-            'openai/gpt-3.5-turbo': 'GPT-3.5 Turbo',
-            'meta-llama/llama-3.1-8b-instruct:free': 'Llama 3.1 8B (Free)'
+            'google/gemma-2-9b-it:free': 'Gemma 2 9B (Free)'
         };
         return modelNames[this.selectedModel] || this.selectedModel;
     }
