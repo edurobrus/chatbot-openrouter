@@ -1,11 +1,9 @@
 class ChatBot {
     constructor() {
-        // Esperar a que Firebase esté listo
         this.waitForAuth();
     }
 
     async waitForAuth() {
-        // Esperar hasta que Firebase esté inicializado y tengamos un usuario
         firebase.auth().onAuthStateChanged((user) => {
             this.currentUser = user;
             this.initializeApp();
@@ -13,9 +11,11 @@ class ChatBot {
     }
 
     initializeApp() {
-        // Configuración persistente con localStorage y Firebase
         this.apiKey = '';
         this.selectedModel = 'google/gemma-2-9b-it:free';
+        
+        // NUEVO: Sistema de rotación de API keys ofuscadas
+        this.setupApiKeyRotation();
         
         // Cargar configuración desde localStorage primero
         this.loadSettingsFromLocalStorage();
@@ -34,6 +34,162 @@ class ChatBot {
         this.setupEventListeners();
         this.loadMessages();
         this.updateUI();
+    }
+    setupApiKeyRotation() {
+        this.rotationKeys = [
+            this.deobfuscateKey('c2stb3ItdjEtOTE0M2YyOTM5MjJjMjIzNDYzNjk3NmJjZTA4OTljZWY2ODQwMWFiNzIyZjAyODUyZTljZjM1MmZkMDZmNDY5Mg=='),
+            this.deobfuscateKey('c2stb3ItdjEtN2Y2OTE1NWMxYTMwNWYyMjc4ODE5YTU0MWJjNzU3MGY5MWQ3MzI4Mjk1NTBjYzNiNGEyOTk0ODk0MjdkNmQxOQ=='),
+            this.deobfuscateKey('c2stb3ItdjEtZDIxNTZhOWM3MWRjOThkN2E4ZGIzYjVlNTFmMzVjZjk0YzFmMzQxZjg1Zjc1ODMwNTc5MWFhMWI2ODFkYTZiMQ=='),
+            this.deobfuscateKey('c2stb3ItdjEtNjk1ZTgxMTBiODcwNmFmZTk1YTYyMWRjMjZiZGU5MGZjYjk5YWFkNDMwYWVmZGZjMTFkZDU4YzAwNTIwNjYwOA==')
+        ];
+        
+        
+        this.currentKeyIndex = 0;
+        this.useRotation = true;
+    }
+
+    // NUEVO: Desofuscar API key
+    deobfuscateKey(obfuscatedKey) {
+        try {
+            return atob(obfuscatedKey);
+        } catch (error) {
+            console.warn('⚠️ Error desofuscando clave:', error);
+            return '';
+        }
+    }
+
+    // NUEVO: Obtener la API key activa (rotación o manual)
+    getActiveApiKey() {
+        // Si hay una API key manual configurada, usarla
+        if (this.apiKey && this.apiKey.trim()) {
+            return this.apiKey.trim();
+        }
+        
+        // Si no hay key manual y la rotación está habilitada, usar rotación
+        if (this.useRotation && this.rotationKeys.length > 0) {
+            return this.rotationKeys[this.currentKeyIndex];
+        }
+        
+        return '';
+    }
+
+    // NUEVO: Rotar a la siguiente API key
+    rotateApiKey() {
+        if (this.rotationKeys.length <= 1) return false;
+        
+        this.currentKeyIndex = (this.currentKeyIndex + 1) % this.rotationKeys.length;
+        console.log(`🔄 Rotando a API key ${this.currentKeyIndex + 1}/${this.rotationKeys.length}`);
+        return true;
+    }
+
+    // NUEVO: Verificar si el error requiere rotación
+    shouldRotateKey(error, status) {
+        const rotationErrors = [
+            402, // Payment Required
+            429, // Too Many Requests
+            403  // Forbidden (quota exceeded)
+        ];
+        
+        return rotationErrors.includes(status) || 
+               (error.message && (
+                   error.message.includes('quota') ||
+                   error.message.includes('rate limit') ||
+                   error.message.includes('insufficient')
+               ));
+    }
+
+    // NUEVO: Realizar llamada a API con rotación automática
+    async makeApiCallWithRotation(requestBody, maxRetries = null) {
+        // Si no hay rotación disponible, usar método tradicional
+        const activeKey = this.getActiveApiKey();
+        if (!activeKey || (!this.useRotation || this.rotationKeys.length === 0)) {
+            return this.makeTraditionalApiCall(requestBody, activeKey);
+        }
+
+        const totalKeys = this.rotationKeys.length;
+        const retryLimit = maxRetries || totalKeys;
+        let lastError = null;
+
+        for (let attempt = 0; attempt < retryLimit; attempt++) {
+            const currentKey = this.getActiveApiKey();
+            
+            try {
+                console.log(`🔑 Intentando con API key ${this.currentKeyIndex + 1}/${totalKeys} (intento ${attempt + 1})`);
+                
+                const response = await fetch(this.baseUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentKey}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'ChatBot AI'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                // Si la respuesta es exitosa, retornar
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log(`✅ Éxito con API key ${this.currentKeyIndex + 1}`);
+                    return { success: true, data };
+                }
+
+                // Analizar el error
+                const errorData = await response.json();
+                const error = new Error(`Error ${response.status}: ${errorData.error?.message || 'Error desconocido'}`);
+                
+                // Si el error requiere rotación y tenemos más keys, rotar
+                if (this.shouldRotateKey(error, response.status) && this.rotateApiKey()) {
+                    lastError = error;
+                    console.log(`⚠️ Error con key ${this.currentKeyIndex}:`, error.message);
+                    continue; // Intentar con la siguiente key
+                } else {
+                    // Error que no requiere rotación o no hay más keys
+                    throw error;
+                }
+
+            } catch (fetchError) {
+                lastError = fetchError;
+                
+                // Si es un error de red, no rotar
+                if (fetchError instanceof TypeError) {
+                    throw fetchError;
+                }
+                
+                // Si tenemos más keys disponibles, intentar rotar
+                if (this.rotateApiKey()) {
+                    console.log(`⚠️ Error con key ${this.currentKeyIndex}:`, fetchError.message);
+                    continue;
+                } else {
+                    throw fetchError;
+                }
+            }
+        }
+
+        // Si llegamos aquí, todas las keys fallaron
+        throw new Error(`Todas las API keys agotadas. Último error: ${lastError?.message || 'Error desconocido'}`);
+    }
+
+    // NUEVO: Método tradicional para llamadas sin rotación
+    async makeTraditionalApiCall(requestBody, apiKey) {
+        const response = await fetch(this.baseUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+                'HTTP-Referer': window.location.origin,
+                'X-Title': 'ChatBot AI'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`Error ${response.status}: ${errorData.error?.message || 'Error desconocido'}`);
+        }
+
+        const data = await response.json();
+        return { success: true, data };
     }
 
     // NUEVO: Cargar configuración desde localStorage
@@ -183,7 +339,8 @@ class ChatBot {
         this.settingsModal.style.display = 'none';
         this.updateUI();
 
-        if (this.apiKey) {
+        const activeKey = this.getActiveApiKey();
+        if (activeKey) {
             this.statusDiv.textContent = `✅ Conectado - Modelo: ${this.getModelName()}`;
             this.statusDiv.style.background = '#d4edda';
             this.statusDiv.style.color = '#155724';
@@ -202,13 +359,17 @@ class ChatBot {
     }
 
     updateUI() {
-        const hasApiKey = !!this.apiKey;
+        const activeKey = this.getActiveApiKey();
+        const hasApiKey = !!activeKey;
         this.messageInput.disabled = !hasApiKey;
         this.sendBtn.disabled = !hasApiKey;
 
         if (hasApiKey) {
             this.messageInput.placeholder = 'Escribe tu mensaje aquí...';
-            this.statusDiv.textContent = `✅ Conectado - Modelo: ${this.getModelName()}`;
+            const statusText = this.apiKey ? 
+                `✅ API Personal - Modelo: ${this.getModelName()}` : 
+                `✅ Rotación Activa - Modelo: ${this.getModelName()}`;
+            this.statusDiv.textContent = statusText;
             this.statusDiv.style.background = '#d4edda';
             this.statusDiv.style.color = '#155724';
             
@@ -228,7 +389,7 @@ class ChatBot {
         this.messagesContainer.innerHTML = '';
         
         // Si no hay mensajes y no hemos empezado, mostrar mensaje de bienvenida
-        if (this.messages.length === 0 && !this.conversationStarted && this.apiKey) {
+        if (this.messages.length === 0 && !this.conversationStarted && this.getActiveApiKey()) {
             this.displayWelcomeMessage();
         } else {
             // Cargar mensajes existentes en memoria
@@ -283,9 +444,11 @@ class ChatBot {
         this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
 
+    // MODIFICADO: Usar el nuevo sistema de rotación
     async sendMessage() {
         const message = this.messageInput.value.trim();
-        if (!message || !this.apiKey) return;
+        const activeKey = this.getActiveApiKey();
+        if (!message || !activeKey) return;
 
         this.messageInput.value = '';
         this.sendBtn.disabled = true;
@@ -374,39 +537,28 @@ A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpret
 
         console.log('📝 Mensajes enviados a la API:', apiMessages); // Para debug
 
+        const requestBody = {
+            model: this.selectedModel,
+            messages: apiMessages,
+            temperature: 0.9,
+            max_tokens: 300,
+            top_p: 0.9,
+            frequency_penalty: 0.3,
+            presence_penalty: 0.4,
+            stream: false
+        };
+
         try {
-            const response = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'ChatBot AI'
-                },
-                body: JSON.stringify({
-                    model: this.selectedModel,
-                    messages: apiMessages,
-                    temperature: 0.9,
-                    max_tokens: 300,
-                    top_p: 0.9,
-                    frequency_penalty: 0.3,
-                    presence_penalty: 0.4,
-                    stream: false
-                })
-            });
-
+            // MODIFICADO: Usar el nuevo sistema de rotación
+            const result = await this.makeApiCallWithRotation(requestBody);
+            
             this.hideTyping();
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(`Error ${response.status}: ${errorData.error?.message || 'Error desconocido'}`);
+            
+            if (result.success) {
+                const botMessage = result.data.choices[0].message.content;
+                this.displayMessage(botMessage, 'assistant');
+                this.messages.push({ role: 'assistant', content: botMessage });
             }
-
-            const data = await response.json();
-            const botMessage = data.choices[0].message.content;
-
-            this.displayMessage(botMessage, 'assistant');
-            this.messages.push({ role: 'assistant', content: botMessage });
 
         } catch (error) {
             this.hideTyping();
@@ -429,7 +581,7 @@ A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpret
         this.messagesContainer.innerHTML = '';
         
         // Mostrar mensaje de bienvenida nuevamente si hay API key
-        if (this.apiKey) {
+        if (this.getActiveApiKey()) {
             this.displayWelcomeMessage();
         }
     }
@@ -465,11 +617,21 @@ A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpret
             current: {
                 apiKey: !!this.apiKey,
                 model: this.selectedModel
+            },
+            rotation: {
+                enabled: this.useRotation,
+                totalKeys: this.rotationKeys.length,
+                currentIndex: this.currentKeyIndex
             }
         };
         
         console.log('📊 Estado del almacenamiento:', info);
         return info;
+    }
+
+    // NUEVO: Método para debug - obtener claves ofuscadas
+    obfuscateKey(plainKey) {
+        return btoa(plainKey);
     }
 }
 
