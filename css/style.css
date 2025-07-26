@@ -518,18 +518,20 @@ header h1 {
 }
 
 .logout-btn {
-    background: rgba(199, 103, 103, 0.2); /* más transparente */
-    color: #555; /* gris oscuro en lugar de blanco */
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
     border: none;
     padding: 8px 14px;
     border-radius: 8px;
     cursor: pointer;
     font-size: 13px;
-    font-weight: 500; /* menos negrita */
+    font-weight: 600;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .logout-btn:hover {
-    background: rgba(199, 103, 103, 0.3); /* un poco más visible al pasar el mouse */
+    background: rgba(220, 38, 38, 1);
+    transform: translateY(-1px);
 }
 
 @keyframes slideIn {
