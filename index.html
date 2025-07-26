@@ -10,6 +10,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Google API para logout completo -->
+    <script src="https://apis.google.com/js/api.js"></script>
 </head>
 <body>
     <!-- Pantalla de Login -->
@@ -54,14 +56,16 @@
         <header>
             <div class="header-left">
                 <h1>🌸 Aura</h1>
+
             </div>
             <div class="header-right">
                 <div id="user-info" class="user-info">
                     <img id="user-avatar" class="user-avatar" src="" alt="">
-                    <span id="user-name"></span>
+                    <span style="color: #333;" id="user-name"></span>
                 </div>
+                <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
                 <button id="settings-btn" class="settings-btn">⚙️</button>
-                <button id="logout-btn" class="logout-btn">🚪</button>
+                
             </div>
         </header>
 
@@ -88,17 +92,22 @@
             <div id="messages"></div>
         </div>
 
-        <div class="input-container">
-            <input type="text" id="message-input" placeholder="Escribe tu mensaje aquí..." disabled>
-            <button id="send-btn" disabled>Enviar</button>
+        <div class="input-container-fixed">
+            <div class="input-wrapper">
+                <input type="text" id="message-input" placeholder="Escribe tu mensaje aquí..." disabled>
+                <button id="send-btn" disabled>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+            <div id="status">⚠️ Configura tu API key para empezar</div>
         </div>
-
-        <div id="status">⚠️ Configura tu API key para empezar</div>
     </div>
 
     <script>
         // Configuración de Firebase (REEMPLAZA CON TUS DATOS)
-       const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyDhk87l2Zms8mT80__bAZA56825C7yoxQo",
             authDomain: "fir-auth-46398.firebaseapp.com",
             projectId: "fir-auth-46398",
@@ -178,10 +187,23 @@
 
         async function logout() {
             try {
+                // Cerrar sesión de Firebase
                 await auth.signOut();
+                
+                // Forzar cierre de sesión de Google también
+                if (window.gapi && window.gapi.auth2) {
+                    const authInstance = window.gapi.auth2.getAuthInstance();
+                    if (authInstance) {
+                        await authInstance.signOut();
+                        await authInstance.disconnect();
+                    }
+                }
+                
                 console.log('Logout exitoso');
             } catch (error) {
                 console.error('Error en logout:', error);
+                // Forzar logout local aunque falle el de Google
+                window.location.reload();
             }
         }
 
@@ -284,7 +306,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:blue
             padding: 20px;
         }
 
@@ -396,6 +418,155 @@
             padding: 15px 20px;
             background: white;
             border-bottom: 1px solid #eee;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        /* Contenedor principal ajustado */
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            padding-top: 70px; /* Espacio para header fijo */
+        }
+
+        /* Chat container ajustado */
+        #chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding-bottom: 120px; /* Espacio para input fijo */
+        }
+
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        /* Input container fijo */
+        .input-container-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            padding: 15px 20px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            max-width: 800px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        #message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        #message-input:focus {
+            border-color: #667eea;
+        }
+
+        #send-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            min-width: 48px;
+            height: 48px;
+        }
+
+        #send-btn:hover {
+            background: #5a6fd8;
+            transform: scale(1.05);
+        }
+
+        #send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #status {
+            text-align: center;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 10px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Mensajes del chat */
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            border-radius: 18px;
+            max-width: 70%;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user {
+            background: #667eea;
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .message.bot {
+            background: white;
+            color: #333;
+            border: 1px solid #e0e0e0;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .typing {
+            background: white;
+            color: #666;
+            padding: 12px 15px;
+            border-radius: 18px;
+            border-bottom-left-radius: 5px;
+            max-width: 70%;
+            margin-right: auto;
+            margin-bottom: 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .typing::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { color: transparent; }
+            40% { color: #666; }
+            100% { color: transparent; }
         }
 
         .header-left, .header-right {
@@ -420,7 +591,7 @@
             object-fit: cover;
         }
 
-        .logout-btn {
+        .logout-btn, .settings-btn {
             background: #dc3545;
             color: white;
             border: none;
@@ -428,10 +599,62 @@
             border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .settings-btn {
+            background: #6c757d;
         }
 
         .logout-btn:hover {
             background: #c82333;
+        }
+
+        .settings-btn:hover {
+            background: #5a6268;
+        }
+
+        /* Modal ajustado para header fijo */
+        .modal {
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding-top: 60px;
+            }
+            
+            header {
+                padding: 10px 15px;
+            }
+            
+            .header-left h1 {
+                font-size: 1.5em;
+            }
+            
+            .user-info span {
+                display: none;
+            }
+            
+            #chat-container {
+                padding-bottom: 140px;
+            }
+            
+            .input-container-fixed {
+                padding: 10px 15px;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
         }
     </style>
 </body>
