@@ -340,11 +340,12 @@ class ChatBot {
         if (hasApiKey) {
             this.messageInput.placeholder = 'Escribe tu mensaje aquí...';
             const statusText = this.apiKey ? 
-                `✅ API Personal - Modelo: ${this.getModelName()}` : 
-                `✅ Rotación Activa - Modelo: ${this.getModelName()}`;
+                `✅ Conectado` : 
+                `✅ Conectado`;
             this.statusDiv.textContent = statusText;
             this.statusDiv.style.background = '#d4edda';
             this.statusDiv.style.color = '#155724';
+            this.statusDiv.style.display = 'none';
             
             if (!this.conversationStarted && this.messages.length === 0) {
                 this.displayWelcomeMessage();
@@ -372,7 +373,7 @@ class ChatBot {
     }
 
     displayWelcomeMessage() {
-        const welcomeMessage = "Hola 🌸 Soy Aura, estoy aquí para escucharte sin juzgar.\n\nSoy una IA, no un profesional de salud. Si estás en crisis, busca ayuda profesional.\n\n¿Cómo estás hoy?";
+        const welcomeMessage = "Hola 🌸 Soy Aura, estoy aquí para escucharte sin juzgar. ¿Cómo estás hoy?";
         this.displayMessage(welcomeMessage, 'assistant');
         this.messages.push({ role: 'assistant', content: welcomeMessage });
         this.conversationStarted = true;
@@ -499,7 +500,7 @@ Sé natural, empática y SIEMPRE en español perfecto, sin comillas.`;
         const requestBody = {
             model: this.selectedModel,
             messages: apiMessages,
-            temperature: 0.6,        // Más bajo para mayor consistencia
+            temperature: 0.9,        // Más bajo para mayor consistencia
             max_tokens: 120,         // Más bajo para respuestas más cortas
             top_p: 0.7,             // Más conservador
             frequency_penalty: 0.6,  // Mayor penalización por repeticiones
