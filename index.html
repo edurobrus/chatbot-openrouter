@@ -64,20 +64,51 @@
 
     <!-- Aplicación Principal (oculta inicialmente) -->
     <div id="app-container" class="container" style="display: none;">
-        <header>
-            <div class="header-left">
-                <img src="icon.png" alt="">
-            </div>
-            <div class="header-right">
-                <div id="user-info" class="user-info">
-                    <img id="user-avatar" class="user-avatar" src="" alt="">
-                    <span style="color: #333;" id="user-name"></span>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <div class="user-avatar-container">
+                        <img id="user-avatar" class="user-avatar" src="" alt="">
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-name-sidebar">serenly</div>
+                        <div class="user-status">● Online</div>
+                    </div>
                 </div>
-                <button id="logout-btn" class="logout-btn">Cerrar Sesión</button>
-                <button id="settings-btn" class="settings-btn">⚙️</button>
             </div>
-        </header>
+            
+            <div class="sidebar-actions">
+                <button class="sidebar-btn" title="Configuración" id="settings-btn">⚙️</button>
+                <button class="sidebar-btn" title="Cerrar Sesión" id="logout-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16,17 21,12 16,7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg></button>
+            </div>
+        </div>
 
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chat Container -->
+            <div id="chat-container">
+                <div id="messages"></div>
+            </div>
+
+            <!-- Input Container -->
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <input type="text" id="message-input" placeholder="Escribe tu mensaje aquí..." disabled>
+                    <button id="send-btn" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up w-4 h-4 md:w-5 md:h-5" aria-hidden="true"><path d="m5 12 7-7 7 7"></path><path d="M12 19V5"></path></svg>
+                    </button>
+                </div>
+                <div id="status">⚠️ Configura tu API key para empezar</div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
         <div id="settings-modal" class="modal">
             <div class="modal-content">
                 <span class="close">&times;</span>
@@ -95,22 +126,6 @@
                 </div>
                 <button id="save-settings">Guardar</button>
             </div>
-        </div>
-
-        <div id="chat-container">
-            <div id="messages"></div>
-        </div>
-
-        <div class="input-container-fixed">
-            <div class="input-wrapper">
-                <input type="text" id="message-input" placeholder="Escribe tu mensaje aquí..." disabled>
-                <button id="send-btn" disabled>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                    </svg>
-                </button>
-            </div>
-            <div id="status">⚠️ Configura tu API key para empezar</div>
         </div>
     </div>
 
@@ -148,8 +163,7 @@
         const anonymousBtn = document.getElementById('anonymous-btn');
         const logoutBtn = document.getElementById('logout-btn');
         const userAvatar = document.getElementById('user-avatar');
-        const userName = document.getElementById('user-name');
-        const userInfo = document.getElementById('user-info');
+        const userName = document.getElementById('user-name-sidebar');
 
         // NUEVO: Función para mostrar loading
         function showLoading() {
@@ -162,16 +176,15 @@
         function showApp() {
             loadingContainer.style.display = 'none';
             authContainer.style.display = 'none';
-            appContainer.style.display = 'block';
+            appContainer.style.display = 'flex';
             
             // Mostrar info del usuario
-            if (currentUser.isAnonymous) {
-                userInfo.style.display = 'none';
-                userName.textContent = 'Invitado';
-            } else {
-                userInfo.style.display = 'flex';
-                userAvatar.src = currentUser.photoURL || 'https://via.placeholder.com/32';
+            if (currentUser && !currentUser.isAnonymous) {
+                userAvatar.src = currentUser.photoURL || 'https://via.placeholder.com/40';
                 userName.textContent = currentUser.displayName || 'Usuario';
+            } else {
+                userAvatar.src = 'https://via.placeholder.com/40';
+                userName.textContent = 'serenly';
             }
         }
 
@@ -349,455 +362,5 @@
     </script>
     
     <script src="js/app.js"></script>
-
-    <style>
-        /* NUEVO: Estilos para pantalla de loading */
-        .loading-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: rgb(121, 121, 177);
-            padding: 20px;
-        }
-
-        .loading-spinner {
-            text-align: center;
-            color: white;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .loading-spinner p {
-            font-size: 2em;
-            margin: 0 0 10px 0;
-            font-weight: bold;
-        }
-
-        .loading-spinner small {
-            font-size: 16px;
-            opacity: 0.8;
-        }
-
-        /* Estilos para autenticación */
-        .auth-container {
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: rgb(121, 121, 177);
-            padding: 20px;
-            /* MODIFICADO: Agregar transición suave */
-            opacity: 0;
-            animation: fadeIn 0.3s ease-in-out forwards;
-        }
-
-        .auth-container[style*="flex"] {
-            display: flex !important;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .auth-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-align: center;
-            /* NUEVO: Animación de entrada */
-            transform: translateY(20px);
-            animation: slideUp 0.4s ease-out 0.1s forwards;
-        }
-
-        @keyframes slideUp {
-            to {
-                transform: translateY(0);
-            }
-        }
-
-        .auth-header h1 {
-            font-size: 2.5em;
-            margin: 0 0 10px 0;
-            color: #333;
-        }
-
-        .auth-header p {
-            color: #666;
-            margin: 0 0 30px 0;
-        }
-
-        .auth-content h2 {
-            color: #333;
-            margin: 0 0 10px 0;
-        }
-
-        .auth-content p {
-            color: #666;
-            margin: 0 0 30px 0;
-        }
-
-        .google-btn, .anonymous-btn {
-            width: 100%;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            margin-bottom: 15px;
-        }
-
-        .google-btn {
-            background: white;
-            color: #333;
-            border: 2px solid #ddd;
-        }
-
-        .google-btn:hover:not(:disabled) {
-            background: #f8f9fa;
-            transform: translateY(-2px);
-        }
-
-        .google-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .anonymous-btn {
-            background: #667eea;
-            color: white;
-        }
-
-        .anonymous-btn:hover:not(:disabled) {
-            background: #5a6fd8;
-            transform: translateY(-2px);
-        }
-
-        .anonymous-btn:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .auth-divider {
-            margin: 20px 0;
-            position: relative;
-            color: #999;
-        }
-
-        .auth-divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: #ddd;
-        }
-
-        .auth-divider span {
-            background: white;
-            padding: 0 15px;
-        }
-
-        .auth-footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .auth-footer p {
-            font-size: 12px;
-            color: #999;
-            margin: 0;
-        }
-
-        /* MODIFICADO: App container con animación */
-        .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            padding-top: 70px;
-            opacity: 0;
-            animation: fadeIn 0.3s ease-in-out forwards;
-        }
-
-        .container[style*="block"] {
-            display: flex !important;
-        }
-
-        /* Estilos para header con usuario */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: white;
-            border-bottom: 1px solid #eee;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000;
-        }
-
-        /* Chat container ajustado */
-        #chat-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            padding-bottom: 120px;
-        }
-
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            background: #ffffff;
-        }
-
-        /* Input container fijo */
-        .input-container-fixed {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 1px solid #eee;
-            padding: 15px 20px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .input-wrapper {
-            display: flex;
-            gap: 10px;
-            max-width: 800px;
-            margin: 0 auto;
-            align-items: center;
-        }
-
-        #message-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 25px;
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        #message-input:focus {
-            border-color: #667eea;
-        }
-
-        #send-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            min-width: 48px;
-            height: 48px;
-        }
-
-        #send-btn:hover {
-            background: #5a6fd8;
-            transform: scale(1.05);
-        }
-
-        #send-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        #status {
-            text-align: center;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 14px;
-            margin-top: 10px;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Mensajes del chat */
-        .message {
-            margin-bottom: 15px;
-            padding: 12px 15px;
-            border-radius: 18px;
-            max-width: 70%;
-            word-wrap: break-word;
-            line-height: 1.4;
-        }
-
-        .message.user {
-            background: #667eea;
-            color: white;
-            margin-left: auto;
-            border-bottom-right-radius: 5px;
-        }
-
-        .message.bot {
-            background: white;
-            color: #333;
-            border: 1px solid #e0e0e0;
-            margin-right: auto;
-            border-bottom-left-radius: 5px;
-        }
-
-        .typing {
-            background: white;
-            color: #666;
-            padding: 12px 15px;
-            border-radius: 18px;
-            border-bottom-left-radius: 5px;
-            max-width: 70%;
-            margin-right: auto;
-            margin-bottom: 15px;
-            border: 1px solid #e0e0e0;
-        }
-
-        .typing::after {
-            content: '...';
-            animation: dots 1.5s infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { color: transparent; }
-            40% { color: #666; }
-            100% { color: transparent; }
-        }
-
-        .header-left, .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 5px 10px;
-            background: #f8f9fa;
-            border-radius: 20px;
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .settings-btn {
-            background: #ea848e;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        .logout-btn {
-            background: rgba(199, 103, 103, 0.2); /* más transparente */
-            color: #555; /* gris oscuro en lugar de blanco */
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500; /* menos negrita */
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .logout-btn:hover {
-            background: rgba(199, 103, 103, 0.3); /* un poco más visible al pasar el mouse */
-        }
-                
-
-        .settings-btn {
-            background: #6c757d;
-        }
-
-        .settings-btn:hover {
-            background: #5a6268;
-        }
-
-        /* Modal ajustado para header fijo */
-        .modal {
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            display: none;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding-top: 60px;
-            }
-            
-            header {
-                padding: 10px 15px;
-            }
-            
-            .header-left h1 {
-                font-size: 1.5em;
-            }
-            
-            .user-info span {
-                display: none;
-            }
-            
-            #chat-container {
-                padding-bottom: 140px;
-            }
-            
-            .input-container-fixed {
-                bottom: 50px;
-                padding: 10px 15px;
-            }
-            
-            .message {
-                max-width: 85%;
-            }
-        }
-    </style>
 </body>
 </html>
