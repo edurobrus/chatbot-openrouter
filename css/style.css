@@ -434,7 +434,7 @@ flex-shrink: 0;
 
 .typing::after {
 content: 'Aura está escribiendo...';
-background: #f1f3f4;
+background: #ffffff;
 color: #202124;
 padding: 12px 16px;
 border-radius: 20px;

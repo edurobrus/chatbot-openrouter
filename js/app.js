@@ -340,12 +340,12 @@ class ChatBot {
         if (hasApiKey) {
             this.messageInput.placeholder = 'Escribe tu mensaje aquí...';
             const statusText = this.apiKey ? 
-                `✅ Conectado` : 
-                `✅ Conectado`;
+                `` : 
+                ``;
             this.statusDiv.textContent = statusText;
-            this.statusDiv.style.background = '#d4edda';
-            this.statusDiv.style.color = '#155724';
-            this.statusDiv.style.display = 'none';
+            this.statusDiv.style.background = '#f7f8fc';
+            this.statusDiv.style.color = '#f7f8fc';
+            this.statusDiv.style.borderBlockColor = '#f7f8fc';
             
             if (!this.conversationStarted && this.messages.length === 0) {
                 this.displayWelcomeMessage();
@@ -518,7 +518,7 @@ Sé natural, empática y SIEMPRE en español perfecto, sin comillas.`;
                 
                 // Actualizar indicador de typing con información del intento
                 if (attempt > 1) {
-                    this.updateTypingMessage(`Reintentando respuesta (${attempt}/${maxRetries})...`);
+                    this.updateTypingMessage(`Reintentando respuesta (${attempt}/${maxRetries})`);
                 }
 
                 const result = await this.makeApiCallWithRotation(requestBody);
