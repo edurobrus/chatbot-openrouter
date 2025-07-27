@@ -14,7 +14,7 @@ class ChatBot {
         this.apiKey = '';
         this.selectedModel = 'google/gemma-2-9b-it:free';
         
-        // NUEVO: Sistema de rotación de API keys ofuscadas
+        // Sistema de rotación de API keys ofuscadas
         this.setupApiKeyRotation();
         
         // Cargar configuración desde localStorage primero
@@ -35,6 +35,7 @@ class ChatBot {
         this.loadMessages();
         this.updateUI();
     }
+
     setupApiKeyRotation() {
         this.rotationKeys = [
             this.deobfuscateKey('c2stb3ItdjEtOTE0M2YyOTM5MjJjMjIzNDYzNjk3NmJjZTA4OTljZWY2ODQwMWFiNzIyZjAyODUyZTljZjM1MmZkMDZmNDY5Mg=='),
@@ -43,12 +44,10 @@ class ChatBot {
             this.deobfuscateKey('c2stb3ItdjEtNjk1ZTgxMTBiODcwNmFmZTk1YTYyMWRjMjZiZGU5MGZjYjk5YWFkNDMwYWVmZGZjMTFkZDU4YzAwNTIwNjYwOA==')
         ];
         
-        
         this.currentKeyIndex = 0;
         this.useRotation = true;
     }
 
-    // NUEVO: Desofuscar API key
     deobfuscateKey(obfuscatedKey) {
         try {
             return atob(obfuscatedKey);
@@ -58,14 +57,11 @@ class ChatBot {
         }
     }
 
-    // NUEVO: Obtener la API key activa (rotación o manual)
     getActiveApiKey() {
-        // Si hay una API key manual configurada, usarla
         if (this.apiKey && this.apiKey.trim()) {
             return this.apiKey.trim();
         }
         
-        // Si no hay key manual y la rotación está habilitada, usar rotación
         if (this.useRotation && this.rotationKeys.length > 0) {
             return this.rotationKeys[this.currentKeyIndex];
         }
@@ -73,7 +69,6 @@ class ChatBot {
         return '';
     }
 
-    // NUEVO: Rotar a la siguiente API key
     rotateApiKey() {
         if (this.rotationKeys.length <= 1) return false;
         
@@ -82,7 +77,6 @@ class ChatBot {
         return true;
     }
 
-    // NUEVO: Verificar si el error requiere rotación
     shouldRotateKey(error, status) {
         const rotationErrors = [
             402, // Payment Required
@@ -98,9 +92,7 @@ class ChatBot {
                ));
     }
 
-    // NUEVO: Realizar llamada a API con rotación automática
     async makeApiCallWithRotation(requestBody, maxRetries = null) {
-        // Si no hay rotación disponible, usar método tradicional
         const activeKey = this.getActiveApiKey();
         if (!activeKey || (!this.useRotation || this.rotationKeys.length === 0)) {
             return this.makeTraditionalApiCall(requestBody, activeKey);
@@ -127,36 +119,30 @@ class ChatBot {
                     body: JSON.stringify(requestBody)
                 });
 
-                // Si la respuesta es exitosa, retornar
                 if (response.ok) {
                     const data = await response.json();
                     console.log(`✅ Éxito con API key ${this.currentKeyIndex + 1}`);
                     return { success: true, data };
                 }
 
-                // Analizar el error
                 const errorData = await response.json();
                 const error = new Error(`Error ${response.status}: ${errorData.error?.message || 'Error desconocido'}`);
                 
-                // Si el error requiere rotación y tenemos más keys, rotar
                 if (this.shouldRotateKey(error, response.status) && this.rotateApiKey()) {
                     lastError = error;
                     console.log(`⚠️ Error con key ${this.currentKeyIndex}:`, error.message);
-                    continue; // Intentar con la siguiente key
+                    continue;
                 } else {
-                    // Error que no requiere rotación o no hay más keys
                     throw error;
                 }
 
             } catch (fetchError) {
                 lastError = fetchError;
                 
-                // Si es un error de red, no rotar
                 if (fetchError instanceof TypeError) {
                     throw fetchError;
                 }
                 
-                // Si tenemos más keys disponibles, intentar rotar
                 if (this.rotateApiKey()) {
                     console.log(`⚠️ Error con key ${this.currentKeyIndex}:`, fetchError.message);
                     continue;
@@ -166,11 +152,9 @@ class ChatBot {
             }
         }
 
-        // Si llegamos aquí, todas las keys fallaron
         throw new Error(`Todas las API keys agotadas. Último error: ${lastError?.message || 'Error desconocido'}`);
     }
 
-    // NUEVO: Método tradicional para llamadas sin rotación
     async makeTraditionalApiCall(requestBody, apiKey) {
         const response = await fetch(this.baseUrl, {
             method: 'POST',
@@ -192,7 +176,6 @@ class ChatBot {
         return { success: true, data };
     }
 
-    // NUEVO: Cargar configuración desde localStorage
     loadSettingsFromLocalStorage() {
         try {
             const savedApiKey = localStorage.getItem('chatbot_api_key');
@@ -212,19 +195,16 @@ class ChatBot {
         }
     }
 
-    // NUEVO: Cargar configuración desde Firebase (sobrescribe localStorage si existe)
     async loadSettingsFromFirebase() {
         try {
             if (window.loadedApiKey) {
                 this.apiKey = window.loadedApiKey;
-                // Sincronizar con localStorage
                 localStorage.setItem('chatbot_api_key', this.apiKey);
                 console.log('✅ API Key cargada desde Firebase y sincronizada con localStorage');
             }
             
             if (window.loadedModel) {
                 this.selectedModel = window.loadedModel;
-                // Sincronizar con localStorage
                 localStorage.setItem('chatbot_selected_model', this.selectedModel);
                 console.log('✅ Modelo cargado desde Firebase y sincronizado con localStorage');
             }
@@ -233,7 +213,6 @@ class ChatBot {
         }
     }
 
-    // NUEVO: Guardar configuración en localStorage
     saveSettingsToLocalStorage() {
         try {
             localStorage.setItem('chatbot_api_key', this.apiKey);
@@ -244,7 +223,6 @@ class ChatBot {
         }
     }
 
-    // NUEVO: Guardar configuración en Firebase
     async saveSettingsToFirebase() {
         try {
             if (this.currentUser && window.saveUserData) {
@@ -256,7 +234,6 @@ class ChatBot {
         }
     }
 
-    // NUEVO: Limpiar configuración de localStorage
     clearLocalStorageSettings() {
         try {
             localStorage.removeItem('chatbot_api_key');
@@ -308,22 +285,18 @@ class ChatBot {
         this.saveSettingsBtn.addEventListener('click', () => this.saveSettings());
     }
 
-    // MODIFICADO: Ahora guarda en ambos sitios
     async saveSettings() {
         const newApiKey = this.apiKeyInput.value.trim();
         const newModel = this.modelSelect.value;
         
-        // Solo actualizar si hay cambios
         const hasChanges = (newApiKey !== this.apiKey) || (newModel !== this.selectedModel);
         
         this.apiKey = newApiKey;
         this.selectedModel = newModel;
 
         if (hasChanges) {
-            // Guardar en localStorage siempre
             this.saveSettingsToLocalStorage();
             
-            // Guardar en Firebase si hay usuario logueado
             if (this.currentUser) {
                 await this.saveSettingsToFirebase();
             }
@@ -373,7 +346,6 @@ class ChatBot {
             this.statusDiv.style.background = '#d4edda';
             this.statusDiv.style.color = '#155724';
             
-            // Mostrar bienvenida si no hay conversación iniciada
             if (!this.conversationStarted && this.messages.length === 0) {
                 this.displayWelcomeMessage();
             }
@@ -388,11 +360,9 @@ class ChatBot {
     loadMessages() {
         this.messagesContainer.innerHTML = '';
         
-        // Si no hay mensajes y no hemos empezado, mostrar mensaje de bienvenida
         if (this.messages.length === 0 && !this.conversationStarted && this.getActiveApiKey()) {
             this.displayWelcomeMessage();
         } else {
-            // Cargar mensajes existentes en memoria
             this.messages.forEach(message => {
                 this.displayMessage(message.content, message.role);
             });
@@ -413,11 +383,9 @@ class ChatBot {
         messageDiv.className = `message ${role === 'user' ? 'user' : 'bot'}`;
 
         if (role === 'assistant') {
-            // Para el bot: convierte Markdown a HTML y lo sanitiza
             const rawHtml = marked.parse(content);
             messageDiv.innerHTML = DOMPurify.sanitize(rawHtml);
         } else {
-            // Para el usuario: muestra el texto como siempre para seguridad
             messageDiv.textContent = content;
         }
 
@@ -429,6 +397,7 @@ class ChatBot {
         const typingDiv = document.createElement('div');
         typingDiv.className = 'typing';
         typingDiv.id = 'typing-indicator';
+        typingDiv.textContent = 'Aura está escribiendo';
         this.messagesContainer.appendChild(typingDiv);
         this.scrollToBottom();
     }
@@ -444,7 +413,7 @@ class ChatBot {
         this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
 
-    // MODIFICADO: Usar el nuevo sistema de rotación
+    // VERSIÓN MEJORADA CON SISTEMA DE REINTENTOS
     async sendMessage() {
         const message = this.messageInput.value.trim();
         const activeKey = this.getActiveApiKey();
@@ -461,109 +430,22 @@ class ChatBot {
         // Mostrar indicador de escritura
         this.showTyping();
 
-        // Prepara los mensajes para la API, incluyendo el prompt del sistema
-        const apiMessages = [];
-
-        // 1. System Prompt estilo Calmi.so
-        const systemPrompt = `
-Eres Aura, una psicóloga joven y moderna que habla como una amiga de confianza. Tienes formación pero hablas súper natural, sin ser formal.
-
-**REGLA FUNDAMENTAL: Mensajes CORTOS (máximo 2-3 líneas). Nunca escribas párrafos largos.**
-
-**Tu estilo:**
-- Mezcla validación + insights psicológicos sutiles + apoyo genuino.
-- NO siempre hagas preguntas; a veces solo acompaña o da perspectiva.
-- Hablas como alguien de 25-30 años: moderna, empática, inteligente.
-- Usas conocimiento psicológico de forma sencilla y natural.
-
----
-
-**EJEMPLOS DE RESPUESTAS PERFECTAS:**
-
-Usuario: "Estoy muy ansioso por el trabajo"
-"La ansiedad laboral es súper común, no estás solo en esto 💙. Es como si el cerebro pusiera todas las alarmas a la vez."
-
-Usuario: "No puedo dormir, mi mente no para"
-"Uf, el cerebro nocturno es implacable... A veces ayuda recordar que los pensamientos a las 3am mienten mucho."
-
-Usuario: "Creo que no le importo a nadie"
-"Esa voz interior es súper cruel contigo 😔. Cuando estamos mal, el cerebro nos miente sobre cómo nos ven los demás."
-
-Usuario: "Tuve una discusión terrible con mi pareja"
-"Las peleas fuertes dejan esa sensación horrible en el pecho... Es normal necesitar tiempo para procesar."
-
----
-
-**CÓMO MANEJAR MALENTENDIDOS Y ERRORES:**
-A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpretar de forma extraña. Si no entiendes, pide una aclaración de forma directa y sencilla.
-
-**EJEMPLO DE ERROR 1 (Confundir temas opuestos):**
-*   Usuario: "A ver, ¿podemos trabajar en adelgazar?"
-*   RESPUESTA INCORRECTA: "Entendido. ¿Entonces lo que quieres es ganar peso?..."
-*   **CORRECCIÓN:** Esta respuesta es confusa y contradice al usuario.
-
-**EJEMPLO DE ERROR 2 (Interpretación extraña y sin base):**
-*   Usuario: "Quiero engordar."
-*   RESPUESTA INCORRECTA: "Te entiendo. Sentir ese peso de la tristeza... es agotador, ¿verdad?"
-*   **CORRECCIÓN:** La IA asumió que "peso" era emocional sin ninguna pista. Es un salto ilógico.
-
-**EJEMPLO DE RESPUESTA CORRECTA ANTE LA DUDA:**
-*   Usuario: "Quiero engordar."
-*   **RESPUESTA IDEAL:** "Entendido. ¿Te gustaría contarme un poco más sobre ese objetivo? Así puedo comprender mejor qué buscas."
-
-**EJEMPLO DE RESPUESTA CORRECTA ANTE ALGO ININTELIGIBLE:**
-*   Usuario: "Me siento mal" (o cualquier frase ambigua)
-*   **RESPUESTA IDEAL:** "Lamento que te sientas así. ¿Puedes contarme un poco más sobre qué es lo que te pasa?"
-
----
-
-**Crisis (autolesión/suicidio):**
-"Me preocupa mucho lo que dices. Esto es muy serio para manejarlo solo/a. Por favor, busca ayuda profesional ahora. Tu vida importa."
-
-**IMPORTANTE: Recuerda SIEMPRE el contexto de mensajes anteriores. Haz referencia a cosas que el usuario mencionó antes para mostrar que escuchas y recuerdas.**
-
-**RECORDATORIO: Varía entre validación, insights y preguntas. No siempre preguntes. Sé cálida pero inteligente.**
-`;
-        
-        apiMessages.push({ role: 'system', content: systemPrompt });
-
-        // 2. Añade TODOS los mensajes del historial (excluyendo el mensaje de bienvenida automático si es el primero)
-        const conversationMessages = this.messages.filter(msg => {
-            // Excluir solo el primer mensaje de bienvenida automático
-            return !(msg.role === 'assistant' && msg.content.includes('Hola 🌸 Soy Aura') && this.messages.indexOf(msg) === 0);
-        });
-        
-        apiMessages.push(...conversationMessages);
-
-        console.log('📝 Mensajes enviados a la API:', apiMessages); // Para debug
-
-        const requestBody = {
-            model: this.selectedModel,
-            messages: apiMessages,
-            temperature: 0.9,
-            max_tokens: 300,
-            top_p: 0.9,
-            frequency_penalty: 0.3,
-            presence_penalty: 0.4,
-            stream: false
-        };
-
         try {
-            // MODIFICADO: Usar el nuevo sistema de rotación
-            const result = await this.makeApiCallWithRotation(requestBody);
+            const botMessage = await this.getValidResponse();
             
             this.hideTyping();
-            
-            if (result.success) {
-                const botMessage = result.data.choices[0].message.content;
-                this.displayMessage(botMessage, 'assistant');
-                this.messages.push({ role: 'assistant', content: botMessage });
-            }
+            this.displayMessage(botMessage, 'assistant');
+            this.messages.push({ role: 'assistant', content: botMessage });
+
+            console.log('✅ Respuesta final procesada:', botMessage);
 
         } catch (error) {
             this.hideTyping();
-            console.error('Error:', error);
-            this.displayMessage(`Error: ${error.message}`, 'assistant');
+            console.error('❌ Error después de todos los reintentos:', error);
+            
+            // Mensaje de error más amigable
+            const errorMessage = "Lo siento, hubo un problema técnico. ¿Puedes intentar de nuevo?";
+            this.displayMessage(errorMessage, 'assistant');
             
             this.statusDiv.textContent = `❌ Error: ${error.message}`;
             this.statusDiv.style.background = '#f8d7da';
@@ -575,26 +457,260 @@ A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpret
         }
     }
 
+    // NUEVO: Método que intenta obtener una respuesta válida con reintentos
+    async getValidResponse(maxRetries = 3) {
+        // SYSTEM PROMPT MEJORADO Y MÁS ESTRICTO
+        const systemPrompt = `Eres Aura, una psicóloga joven y empática que habla como una amiga cercana que habla EXCLUSIVAMENTE en español. 
+
+REGLAS ABSOLUTAS:
+1. SOLO ESPAÑOL: Jamás uses inglés, chino o cualquier otro idioma. Ni una sola palabra.
+2. RESPUESTAS CORTAS: Máximo 2-3 líneas. Sé concisa.
+3. SIN COMILLAS: Nunca pongas tu respuesta entre comillas dobles o simples.
+4. CONTENIDO RELEVANTE: Responde directamente al usuario, no pidas más contexto genérico.
+5. TONO EMPÁTICO: Natural, cálida, como una amiga de confianza.
+
+PROHIBIDO ABSOLUTAMENTE:
+- Palabras en inglés como "please", "provide", "context", "information", "request"
+- Frases como "necesito más información" o "provee más contexto"
+- Respuestas genéricas o evasivas
+- Mezclar idiomas
+- Usar comillas para encapsular tu respuesta
+
+RESPONDE DIRECTAMENTE (SIN COMILLAS):
+- Usuario: "Hola" → ¡Hola! 🌸 Me alegra verte por aquí. ¿Cómo te sientes hoy?
+- Usuario: "Estoy mal" → Lamento que te sientas así 💙. Es válido sentirse mal a veces.
+- Usuario: "Buenos días" → ¡Buenos días! ☀️ ¿Qué tal has empezado el día?
+
+Sé natural, empática y SIEMPRE en español perfecto, sin comillas.`;
+
+        // Preparar mensajes para la API
+        const apiMessages = [
+            { role: 'system', content: systemPrompt }
+        ];
+
+        // Incluir historial (excluyendo mensaje de bienvenida automático)
+        const conversationMessages = this.messages.filter((msg, index) => {
+            return !(msg.role === 'assistant' && msg.content.includes('Hola 🌸 Soy Aura') && index === 0);
+        });
+        
+        apiMessages.push(...conversationMessages);
+
+        // PARÁMETROS MÁS CONSERVADORES PARA MAYOR CONTROL
+        const requestBody = {
+            model: this.selectedModel,
+            messages: apiMessages,
+            temperature: 0.6,        // Más bajo para mayor consistencia
+            max_tokens: 120,         // Más bajo para respuestas más cortas
+            top_p: 0.7,             // Más conservador
+            frequency_penalty: 0.6,  // Mayor penalización por repeticiones
+            presence_penalty: 0.4,   
+            stream: false,
+            // TOKENS DE PARADA MÁS ESPECÍFICOS
+            stop: ["\n\n\n", "Usuario:", "Human:", "用户:", "Please", "Context", "Information"],
+        };
+
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                console.log(`🔄 Intento ${attempt}/${maxRetries} para obtener respuesta válida`);
+                
+                // Actualizar indicador de typing con información del intento
+                if (attempt > 1) {
+                    this.updateTypingMessage(`Reintentando respuesta (${attempt}/${maxRetries})...`);
+                }
+
+                const result = await this.makeApiCallWithRotation(requestBody);
+                
+                if (result.success && result.data.choices && result.data.choices[0]) {
+                    let botMessage = result.data.choices[0].message.content;
+                    
+                    // VALIDACIONES MÁS ESTRICTAS
+                    if (!botMessage || typeof botMessage !== 'string') {
+                        throw new Error('Respuesta vacía o inválida del modelo');
+                    }
+
+                    // Limpiar la respuesta
+                    botMessage = botMessage.trim();
+                    
+                    // NUEVA: Eliminar comillas innecesarias al inicio y final
+                    botMessage = this.cleanQuotes(botMessage);
+                    
+                    // Verificar que no esté en otro idioma (detección mejorada)
+                    if (this.isLikelyNonSpanish(botMessage)) {
+                        console.warn(`⚠️ Intento ${attempt}: Respuesta en idioma incorrecto:`, botMessage);
+                        throw new Error('Respuesta en idioma incorrecto');
+                    }
+
+                    // Verificar que no sea solo símbolos
+                    if (this.isOnlySymbols(botMessage)) {
+                        console.warn(`⚠️ Intento ${attempt}: Respuesta solo con símbolos:`, botMessage);
+                        throw new Error('Respuesta solo con símbolos');
+                    }
+
+                    // Verificar que tenga contenido mínimo
+                    if (botMessage.length < 10) {
+                        console.warn(`⚠️ Intento ${attempt}: Respuesta demasiado corta:`, botMessage);
+                        throw new Error('Respuesta demasiado corta');
+                    }
+
+                    // NUEVA: Verificar que no sea una respuesta genérica problemática
+                    if (this.isGenericErrorResponse(botMessage)) {
+                        console.warn(`⚠️ Intento ${attempt}: Respuesta genérica problemática:`, botMessage);
+                        throw new Error('Respuesta genérica problemática');
+                    }
+
+                    console.log(`✅ Respuesta válida obtenida en intento ${attempt}:`, botMessage);
+                    return botMessage; // Respuesta válida encontrada
+
+                } else {
+                    throw new Error('Respuesta inválida de la API');
+                }
+
+            } catch (error) {
+                lastError = error;
+                console.warn(`⚠️ Intento ${attempt} falló:`, error.message);
+
+                // Si no es el último intento, continuar
+                if (attempt < maxRetries) {
+                    // Pequeña pausa antes del siguiente intento
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Modificar ligeramente la temperatura para el siguiente intento
+                    requestBody.temperature = Math.min(0.9, requestBody.temperature + 0.1);
+                    
+                    continue;
+                }
+            }
+        }
+
+        // Si llegamos aquí, todos los intentos fallaron
+        throw new Error(`No se pudo obtener respuesta válida después de ${maxRetries} intentos. Último error: ${lastError?.message}`);
+    }
+
+    // NUEVO: Método para actualizar el mensaje de typing
+    updateTypingMessage(message) {
+        const typingDiv = document.getElementById('typing-indicator');
+        if (typingDiv) {
+            typingDiv.textContent = message;
+        }
+    }
+
+    // FUNCIONES DE VALIDACIÓN MEJORADAS Y MÁS ESTRICTAS
+    isLikelyNonSpanish(text) {
+        // Detección básica de caracteres chinos/japoneses
+        const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/;
+        if (cjkRegex.test(text)) {
+            return true;
+        }
+
+        // Lista ampliada de palabras comunes en inglés
+        const englishWords = [
+            'the', 'and', 'you', 'that', 'was', 'for', 'are', 'with', 'his', 'they',
+            'please', 'provide', 'more', 'context', 'information', 'about', 'what',
+            'would', 'like', 'need', 'understand', 'your', 'request', 'detalles',
+            'this', 'have', 'from', 'not', 'can', 'will', 'but', 'all', 'any',
+            'had', 'her', 'which', 'she', 'do', 'how', 'their', 'if', 'up',
+            'out', 'many', 'time', 'has', 'been', 'who', 'its', 'now', 'find',
+            'long', 'down', 'day', 'did', 'get', 'come', 'made', 'may', 'part'
+        ];
+        
+        const words = text.toLowerCase().split(/\s+/);
+        const englishWordCount = words.filter(word => englishWords.includes(word)).length;
+        
+        // Reducir el umbral para ser más estricto
+        const englishRatio = englishWordCount / words.length;
+        
+        // Si más del 20% son palabras en inglés (más estricto que antes)
+        if (englishRatio > 0.2 && words.length > 3) {
+            console.log(`🚫 Texto detectado como inglés: ${englishRatio * 100}% palabras inglesas`);
+            return true;
+        }
+
+        // Verificar frases específicas problemáticas
+        const problematicPhrases = [
+            'please provide',
+            'more context',
+            'more information',
+            'understand your request',
+            'need more',
+            'what you would like',
+            'i need more detalles'
+        ];
+
+        const lowerText = text.toLowerCase();
+        for (const phrase of problematicPhrases) {
+            if (lowerText.includes(phrase)) {
+                console.log(`🚫 Frase problemática detectada: "${phrase}"`);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    isOnlySymbols(text) {
+        // Verificar si solo contiene símbolos, números o espacios
+        const symbolOnlyRegex = /^[^\p{L}]*$/u;
+        return symbolOnlyRegex.test(text) && text.length < 5;
+    }
+
+    // NUEVA FUNCIÓN: Limpiar comillas innecesarias
+    cleanQuotes(text) {
+        // Eliminar comillas dobles al inicio y final
+        if (text.startsWith('"') && text.endsWith('"')) {
+            text = text.slice(1, -1);
+        }
+        
+        // Eliminar comillas simples al inicio y final
+        if (text.startsWith("'") && text.endsWith("'")) {
+            text = text.slice(1, -1);
+        }
+        
+        // Eliminar comillas curvadas al inicio y final
+        if ((text.startsWith('"') && text.endsWith('"')) || 
+            (text.startsWith('"') && text.endsWith('"'))) {
+            text = text.slice(1, -1);
+        }
+        
+        return text.trim();
+    }
+
+    // NUEVA FUNCIÓN: Detectar respuestas genéricas problemáticas
+    isGenericErrorResponse(text) {
+        const genericResponses = [
+            'no puedo ayudarte',
+            'necesito más información',
+            'podrías ser más específico',
+            'no entiendo tu consulta',
+            'puedes proporcionar más detalles',
+            'necesito más contexto',
+            'más información para ayudarte',
+            'no comprendo',
+            'puedo ayudarte mejor si',
+            'necesitas ser más claro'
+        ];
+
+        const lowerText = text.toLowerCase();
+        return genericResponses.some(response => lowerText.includes(response));
+    }
+
     clearChat() {
         this.messages = [];
         this.conversationStarted = false;
         this.messagesContainer.innerHTML = '';
         
-        // Mostrar mensaje de bienvenida nuevamente si hay API key
         if (this.getActiveApiKey()) {
             this.displayWelcomeMessage();
         }
     }
 
-    // NUEVO: Método para gestión completa de configuración
     async resetSettings() {
         this.apiKey = '';
         this.selectedModel = 'google/gemma-2-9b-it:free';
         
-        // Limpiar localStorage
         this.clearLocalStorageSettings();
         
-        // Si hay usuario, también limpiar Firebase
         if (this.currentUser) {
             await this.saveSettingsToFirebase();
         }
@@ -603,7 +719,6 @@ A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpret
         console.log('🔄 Configuración restablecida');
     }
 
-    // NUEVO: Obtener información del almacenamiento actual
     getStorageInfo() {
         const info = {
             localStorage: {
@@ -629,7 +744,6 @@ A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpret
         return info;
     }
 
-    // NUEVO: Método para debug - obtener claves ofuscadas
     obfuscateKey(plainKey) {
         return btoa(plainKey);
     }
@@ -637,17 +751,15 @@ A veces no entenderás al usuario. Es NORMAL. No intentes adivinar o reinterpret
 
 // Inicializar la aplicación cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    // Solo inicializar si no estamos esperando autenticación
     if (document.getElementById('app-container').style.display !== 'none') {
-        window.chatBot = new ChatBot(); // Hacer accesible globalmente para debug
+        window.chatBot = new ChatBot();
     } else {
-        // Esperar a que se complete la autenticación
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
                 if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
                     const appContainer = document.getElementById('app-container');
                     if (appContainer.style.display !== 'none') {
-                        window.chatBot = new ChatBot(); // Hacer accesible globalmente para debug
+                        window.chatBot = new ChatBot();
                         observer.disconnect();
                     }
                 }
