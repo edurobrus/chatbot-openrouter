@@ -1190,6 +1190,7 @@ CAMBIOS PRINCIPALES PARA RESPONSIVIDAD Y PANTALLA COMPLETA
     max-width: min(800px, calc(100% - 40px)); /* Máximo 800px con margen de 20px a cada lado */
     margin: 0 auto; /* Centrar horizontalmente */
     background: #ffffff;
+    margin-bottom: 5%;
     border-radius: 25px;
     padding: 8px;
     border: 1.5px solid #e2e8f0;
