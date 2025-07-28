@@ -477,7 +477,7 @@ display: flex;
 gap: 12px;
 align-items: center;
 max-width: 800px;
-margin: 5% auto;
+margin-left: -13px;
 background: #ffffff;
 border-radius: 5px;
 padding: 6px;
