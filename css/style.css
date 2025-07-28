@@ -415,7 +415,7 @@ box-shadow: none;
 display: flex;
 align-items: flex-start;
 gap: 12px;
-max-width: 70%;
+max-width: 20%;
 align-self: flex-start;
 animation: fadeIn 0.3s ease-out;
 margin-bottom: 16px;
@@ -423,8 +423,8 @@ margin-bottom: 16px;
 
 .typing::before {
 content: '';
-width: 32px;
-height: 32px;
+width: 12px;
+height: 12px;
 border-radius: 50%;
 background: #6366f1;
 flex-shrink: 0;
@@ -978,7 +978,7 @@ padding: 24px;
     padding: 12px 15px;
     border-radius: 18px;
     border-bottom-left-radius: 5px;
-    max-width: 70%;
+    max-width: 20%;
     margin-right: auto;
     margin-bottom: 15px;
     border: 1px solid #e0e0e0;
