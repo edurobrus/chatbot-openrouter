@@ -345,8 +345,8 @@ class ChatBot {
             this.statusDiv.textContent = statusText;
             this.statusDiv.style.background = '#f7f8fc';
             this.statusDiv.style.color = '#f7f8fc';
-            this.statusDiv.style.borderBlockColor = '#f7f8fc';
-            
+            this.statusDiv.style.borderColor = '#f7f8fc';
+            this.statusDiv.style.borderRadius = '0px';
             if (!this.conversationStarted && this.messages.length === 0) {
                 this.displayWelcomeMessage();
             }
