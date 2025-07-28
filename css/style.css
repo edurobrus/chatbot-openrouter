@@ -788,7 +788,7 @@ padding: 24px;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: rgb(121, 121, 177);
+    background: rgb(255, 255, 255);
     padding: 20px;
     /* MODIFICADO: Agregar transición suave */
     opacity: 0;
@@ -810,7 +810,6 @@ padding: 24px;
     padding: 40px;
     max-width: 400px;
     width: 100%;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
     text-align: center;
     /* NUEVO: Animación de entrada */
     transform: translateY(20px);
