@@ -1428,3 +1428,208 @@ body {
     transform: none;
     box-shadow: none;
 }
+/* ==========================================================================
+INPUT WRAPPER CON MARGIN-BOTTOM PARA SUBIRLO
+========================================================================== */
+
+/* OPCIÓN 1: Agregar margin-bottom al input-wrapper */
+.input-wrapper {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    max-width: min(800px, calc(100% - 40px));
+    margin: 0 auto;
+    margin-bottom: 30px; /* AGREGAR ESTE MARGIN-BOTTOM para subirlo */
+    background: #ffffff;
+    border-radius: 25px;
+    padding: 8px;
+    border: 1.5px solid #e2e8f0;
+    transition: border-color 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+/* OPCIÓN 2: Margin-bottom al input-container */
+.input-container {
+    padding: 20px;
+    background: #f7f8fc;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 40px; /* AGREGAR MARGIN-BOTTOM aquí */
+}
+
+/* OPCIÓN 3: Combinación de ambos para más control */
+.input-container-with-margin {
+    padding: 20px;
+    background: #f7f8fc;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 50px; /* Margen del contenedor */
+}
+
+.input-wrapper-with-margin {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    max-width: min(800px, calc(100% - 40px));
+    margin: 0 auto;
+    margin-bottom: 20px; /* Margen adicional del wrapper */
+    background: #ffffff;
+    border-radius: 25px;
+    padding: 8px;
+    border: 1.5px solid #e2e8f0;
+    transition: border-color 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+DIFERENTES VALORES DE MARGIN-BOTTOM
+========================================================================== */
+
+/* Poco espacio hacia arriba */
+.input-margin-small {
+    margin-bottom: 15px !important;
+}
+
+/* Espacio medio hacia arriba */
+.input-margin-medium {
+    margin-bottom: 30px !important;
+}
+
+/* Mucho espacio hacia arriba */
+.input-margin-large {
+    margin-bottom: 50px !important;
+}
+
+/* Espacio extra hacia arriba */
+.input-margin-extra {
+    margin-bottom: 70px !important;
+}
+
+/* ==========================================================================
+RESPONSIVE MARGINS
+========================================================================== */
+
+@media (max-width: 1024px) {
+    .input-wrapper {
+        margin-bottom: 25px;
+    }
+    
+    .input-container {
+        margin-bottom: 35px;
+    }
+    
+    .input-wrapper-with-margin {
+        margin-bottom: 15px;
+    }
+    
+    .input-container-with-margin {
+        margin-bottom: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .input-wrapper {
+        margin-bottom: 20px;
+    }
+    
+    .input-container {
+        margin-bottom: 30px;
+    }
+    
+    .input-wrapper-with-margin {
+        margin-bottom: 12px;
+    }
+    
+    .input-container-with-margin {
+        margin-bottom: 30px;
+    }
+}
+
+@media (max-width: 480px) {
+    .input-wrapper {
+        margin-bottom: 15px;
+    }
+    
+    .input-container {
+        margin-bottom: 25px;
+    }
+    
+    .input-wrapper-with-margin {
+        margin-bottom: 10px;
+    }
+    
+    .input-container-with-margin {
+        margin-bottom: 25px;
+    }
+}
+
+/* ==========================================================================
+SI USAS POSITION FIXED - MARGIN-BOTTOM NO APLICA, USA BOTTOM
+========================================================================== */
+
+/* Para inputs con position fixed, usa bottom en lugar de margin-bottom */
+.input-fixed-higher {
+    position: fixed;
+    bottom: 40px; /* Equivale a margin-bottom: 40px */
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(800px, calc(100vw - 40px));
+    background: #ffffff;
+    border-radius: 25px;
+    padding: 8px;
+    border: 1.5px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+/* ==========================================================================
+AJUSTE DEL MAIN-CONTENT PARA ACOMODAR EL MARGIN-BOTTOM
+========================================================================== */
+
+/* Si el input tiene margin-bottom grande, ajusta el contenedor principal */
+.main-content-adjusted {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #f7f8fc;
+    position: relative;
+    min-width: 0;
+    overflow: hidden;
+    padding-bottom: 0; /* Remover padding si usas margin-bottom */
+}
+
+/* Chat container sin padding-bottom si usas margin-bottom en input */
+#chat-container-no-padding {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    background: #f7f8fc;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 0; /* Sin padding porque el input tiene margin-bottom */
+}
+
+/* ==========================================================================
+CLASES UTILITARIAS FÁCILES DE USAR
+========================================================================== */
+
+/* Agregar a tu input-wrapper la clase que prefieras: */
+
+.mb-10 { margin-bottom: 10px !important; }
+.mb-15 { margin-bottom: 15px !important; }
+.mb-20 { margin-bottom: 20px !important; }
+.mb-25 { margin-bottom: 25px !important; }
+.mb-30 { margin-bottom: 30px !important; }
+.mb-40 { margin-bottom: 40px !important; }
+.mb-50 { margin-bottom: 50px !important; }
