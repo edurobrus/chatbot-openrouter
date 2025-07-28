@@ -1347,6 +1347,7 @@ CAMBIOS PRINCIPALES PARA RESPONSIVIDAD Y PANTALLA COMPLETA
     .input-wrapper {
         max-width: calc(100% - 10px);
         padding: 4px;
+         margin-bottom: 30px;
         gap: 8px;
     }
     
@@ -1411,6 +1412,7 @@ body {
 /* 13. ASEGURAR QUE EL LAYOUT SE MANTENGA */
 .input-wrapper:focus-within {
     border-color: #6366f1;
+     margin-bottom: 5%;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
