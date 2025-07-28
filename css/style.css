@@ -1299,6 +1299,7 @@ CAMBIOS PRINCIPALES PARA RESPONSIVIDAD Y PANTALLA COMPLETA
     .input-wrapper {
         max-width: calc(100% - 20px);
         border-radius: 20px;
+         margin-bottom: 5%;
         padding: 6px;
     }
     
