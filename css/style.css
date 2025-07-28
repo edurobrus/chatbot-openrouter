@@ -215,7 +215,8 @@ animation: fadeIn 0.4s ease-out forwards;
 
 /* Sidebar */
 .sidebar {
-width: 80px;
+width: 100px;
+height: 100%;
 background: #ffffff;
 border-right: 1px solid #e2e8f0;
 display: flex;
@@ -226,9 +227,6 @@ position: relative;
 box-shadow: 1px 0 3px rgba(0, 0, 0, 0.05);
 }
 
-.sidebar-header {
-margin-bottom: 32px;
-}
 
 .user-profile {
 display: flex;
@@ -479,7 +477,7 @@ display: flex;
 gap: 12px;
 align-items: center;
 max-width: 800px;
-margin: 0 auto;
+margin: 5% auto;
 background: #ffffff;
 border-radius: 5px;
 padding: 6px;
@@ -698,8 +696,8 @@ Responsive Design
 ========================================================================== */
 @media (max-width: 768px) {
 .sidebar {
-width: 60px;
-padding: 15px 0;
+width: 80px;
+padding: 15px 3px;
 }
 
 .user-name, .user-status {
@@ -1022,7 +1020,7 @@ padding: 24px;
     background: #ea848e;
     color: white;
     border: none;
-    padding: 8px 12px;
+    padding: 1px 4px;
     border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
@@ -1066,9 +1064,6 @@ padding: 24px;
 
 /* Responsive */
 @media (max-width: 768px) {
-    .container {
-        padding-top: 60px;
-    }
     
     header {
         padding: 10px 15px;
