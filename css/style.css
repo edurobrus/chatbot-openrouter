@@ -289,7 +289,7 @@ font-weight: 500;
 display: flex;
 flex-direction: column;
 gap: 12px;
-margin-top: auto;
+margin-top: 20px;
 }
 
 .sidebar-btn {
