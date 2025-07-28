@@ -384,8 +384,17 @@ class ChatBot {
         messageDiv.className = `message ${role === 'user' ? 'user' : 'bot'}`;
 
         if (role === 'assistant') {
-            const rawHtml = marked.parse(content);
-            messageDiv.innerHTML = DOMPurify.sanitize(rawHtml);
+            // Limpiar el contenido antes de procesarlo
+            const cleanContent = content.replace(/\n{3,}/g, '\n\n').trim();
+            
+            // Si no hay markdown, usar textContent para evitar problemas de formato
+            if (!cleanContent.includes('**') && !cleanContent.includes('*') && 
+                !cleanContent.includes('#') && !cleanContent.includes('`')) {
+                messageDiv.textContent = cleanContent;
+            } else {
+                const rawHtml = marked.parse(cleanContent);
+                messageDiv.innerHTML = DOMPurify.sanitize(rawHtml);
+            }
         } else {
             messageDiv.textContent = content;
         }
