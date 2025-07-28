@@ -12,7 +12,7 @@ class ChatBot {
 
     initializeApp() {
         this.apiKey = '';
-        this.selectedModel = 'google/gemma-2-9b-it:free';
+        this.selectedModel = 'deepseek/deepseek-chat-v3-0324:free';
         
         // Sistema de rotación de API keys ofuscadas
         this.setupApiKeyRotation();
@@ -326,7 +326,7 @@ class ChatBot {
 
     getModelName() {
         const modelNames = {
-            'google/gemma-2-9b-it:free': 'Gemma 2 9B (Free)'
+            'deepseek/deepseek-chat-v3-0324:free': 'DeepSeek Chat V3 (Free)'
         };
         return modelNames[this.selectedModel] || this.selectedModel;
     }
@@ -708,7 +708,7 @@ Sé natural, empática y SIEMPRE en español perfecto, sin comillas.`;
 
     async resetSettings() {
         this.apiKey = '';
-        this.selectedModel = 'google/gemma-2-9b-it:free';
+        this.selectedModel = 'deepseek/deepseek-chat-v3-0324:free';
         
         this.clearLocalStorageSettings();
         
