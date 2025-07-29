@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatBot AI</title>
+    <title>ChatBot Aura</title>
     <link rel="stylesheet" href="css/style.css">
-    
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -491,6 +491,11 @@
             
             <div class="sidebar-actions">
                 <button class="sidebar-btn" title="Configuración" id="settings-btn">⚙️</button>
+                <button class="sidebar-btn" title="Cambiar Tema" id="theme-toggle-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                    </svg>
+                </button>
                 <button class="sidebar-btn" title="Cerrar Sesión" id="logout-btn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                             <polyline points="16,17 21,12 16,7"></polyline>
@@ -574,6 +579,7 @@
         const logoutBtn = document.getElementById('logout-btn');
         const userAvatar = document.getElementById('user-avatar');
         const userName = document.getElementById('user-name-sidebar');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
 
         // Referencias para términos y condiciones
         const termsCheckbox = document.getElementById('terms-checkbox');
@@ -618,6 +624,162 @@
                 userName.textContent = 'serenly';
             }
         }
+
+        function initializeTheme() {
+            // Obtener tema guardado, por defecto 'light'
+            const savedTheme = localStorage.getItem('chatbot_theme') || 'light';
+            
+            console.log('🎨 Inicializando tema:', savedTheme);
+            
+            // Aplicar el tema
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            // Actualizar el icono del botón
+            updateThemeToggleIcon(savedTheme);
+        }
+
+        // Función para cambiar entre temas
+        function toggleTheme() {
+            const isDarkMode = document.body.classList.contains('dark-theme');
+            const newTheme = isDarkMode ? 'light' : 'dark';
+            
+            console.log('🔄 Cambiando tema de', isDarkMode ? 'dark' : 'light', 'a', newTheme);
+            
+            // Aplicar el nuevo tema
+            if (newTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            // Guardar en localStorage
+            localStorage.setItem('chatbot_theme', newTheme);
+            
+            // Actualizar el icono del botón
+            updateThemeToggleIcon(newTheme);
+            
+            // Mostrar feedback visual (opcional)
+            showThemeChangeNotification(newTheme);
+        }
+
+        // Función para actualizar el icono del botón de tema
+        function updateThemeToggleIcon(theme) {
+            const themeButton = document.getElementById('theme-toggle-btn');
+            if (!themeButton) return;
+            
+            if (theme === 'dark') {
+                // Icono de sol para cambiar a tema claro
+                themeButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                    </svg>
+                `;
+                themeButton.title = 'Cambiar a tema claro';
+            } else {
+                // Icono de luna para cambiar a tema oscuro
+                themeButton.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                    </svg>
+                `;
+                themeButton.title = 'Cambiar a tema oscuro';
+            }
+        }
+
+        // Función para mostrar notificación de cambio de tema (opcional)
+        function showThemeChangeNotification(newTheme) {
+            // Crear notificación temporal
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${newTheme === 'dark' ? '#21262d' : '#ffffff'};
+                color: ${newTheme === 'dark' ? '#e6edf3' : '#2d3748'};
+                border: 1px solid ${newTheme === 'dark' ? '#30363d' : '#e2e8f0'};
+                padding: 12px 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            `;
+            
+            const themeName = newTheme === 'dark' ? 'oscuro' : 'claro';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${newTheme === 'dark' ? '🌙' : '☀️'}
+                    <span>Tema ${themeName} activado</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animar entrada
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Animar salida y eliminar
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 2000);
+        }
+
+        // Función para detectar preferencia del sistema (opcional)
+        function detectSystemTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        }
+
+        // Función para aplicar tema según preferencia del sistema (opcional)
+        function applySystemTheme() {
+            const systemTheme = detectSystemTheme();
+            const savedTheme = localStorage.getItem('chatbot_theme');
+            
+            // Solo aplicar tema del sistema si no hay preferencia guardada
+            if (!savedTheme) {
+                localStorage.setItem('chatbot_theme', systemTheme);
+                if (systemTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                }
+                updateThemeToggleIcon(systemTheme);
+                console.log('🖥️ Tema del sistema aplicado:', systemTheme);
+            }
+        }
+
+        // Listener para cambios en la preferencia del sistema (opcional)
+        function setupSystemThemeListener() {
+            if (window.matchMedia) {
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                mediaQuery.addListener((e) => {
+                    const savedTheme = localStorage.getItem('chatbot_theme');
+                    // Solo cambiar si no hay preferencia manual guardada
+                    if (!savedTheme) {
+                        const newTheme = e.matches ? 'dark' : 'light';
+                        if (newTheme === 'dark') {
+                            document.body.classList.add('dark-theme');
+                        } else {
+                            document.body.classList.remove('dark-theme');
+                        }
+                        updateThemeToggleIcon(newTheme);
+                        console.log('🔄 Tema del sistema cambió a:', newTheme);
+                    }
+                });
+            }
+        }
+
 
         // MODIFICADO: Función para mostrar auth con transición suave
         function showAuth() {
@@ -698,6 +860,7 @@
             googleLoginBtn.addEventListener('click', () => validateTermsAndLogin(signInWithGoogle));
             anonymousBtn.addEventListener('click', () => validateTermsAndLogin(signInAnonymously));
             logoutBtn.addEventListener('click', logout);
+            themeToggleBtn.addEventListener('click', toggleTheme);
 
             // NUEVOS: Listeners para términos y condiciones
             termsCheckbox.addEventListener('change', function() {
@@ -877,6 +1040,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             console.log('🚀 DOM loaded, showing loading screen...');
             showLoading();
+            applySystemTheme(); // Primero intenta aplicar el tema del sistema si no hay nada guardado
+            initializeTheme();  // Luego aplica el tema guardado (o el del sistema) a la vista
+            setupSystemThemeListener(); // Y escucha por si el usuario cambia el tema de su sistema
             setupEventListeners();
             
             // Timeout de seguridad en caso de que Firebase tarde mucho

@@ -407,7 +407,7 @@ class ChatBot {
         const typingDiv = document.createElement('div');
         typingDiv.className = 'typing';
         typingDiv.id = 'typing-indicator';
-        typingDiv.textContent = 'Aura está escribiendo';
+        typingDiv.textContent = 'Aura está pensando';
         this.messagesContainer.appendChild(typingDiv);
         this.scrollToBottom();
     }
