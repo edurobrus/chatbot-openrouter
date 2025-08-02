@@ -373,7 +373,7 @@ class ChatBot {
     }
 
     displayWelcomeMessage() {
-        const welcomeMessage = "Hola 🌸 Soy Aura, estoy aquí para escucharte sin juzgar. ¿Cómo estás hoy?";
+        const welcomeMessage = "👋";
         this.displayMessage(welcomeMessage, 'assistant');
         this.messages.push({ role: 'assistant', content: welcomeMessage });
         this.conversationStarted = true;
@@ -384,17 +384,10 @@ class ChatBot {
         messageDiv.className = `message ${role === 'user' ? 'user' : 'bot'}`;
 
         if (role === 'assistant') {
-            // Limpiar el contenido antes de procesarlo
-            const cleanContent = content.replace(/\n{3,}/g, '\n\n').trim();
-            
-            // Si no hay markdown, usar textContent para evitar problemas de formato
-            if (!cleanContent.includes('**') && !cleanContent.includes('*') && 
-                !cleanContent.includes('#') && !cleanContent.includes('`')) {
-                messageDiv.textContent = cleanContent;
-            } else {
-                const rawHtml = marked.parse(cleanContent);
-                messageDiv.innerHTML = DOMPurify.sanitize(rawHtml);
-            }
+            // Para la IA de emoji, mostrar el emoji con tamaño grande
+            messageDiv.style.fontSize = '2em';
+            messageDiv.style.textAlign = 'center';
+            messageDiv.textContent = content;
         } else {
             messageDiv.textContent = content;
         }
@@ -407,7 +400,7 @@ class ChatBot {
         const typingDiv = document.createElement('div');
         typingDiv.className = 'typing';
         typingDiv.id = 'typing-indicator';
-        typingDiv.textContent = 'Aura está pensando';
+        typingDiv.textContent = '🤔 Pensando...';
         this.messagesContainer.appendChild(typingDiv);
         this.scrollToBottom();
     }
@@ -423,7 +416,6 @@ class ChatBot {
         this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
     }
 
-    // VERSIÓN MEJORADA CON SISTEMA DE REINTENTOS
     async sendMessage() {
         const message = this.messageInput.value.trim();
         const activeKey = this.getActiveApiKey();
@@ -441,21 +433,21 @@ class ChatBot {
         this.showTyping();
 
         try {
-            const botMessage = await this.getValidResponse();
+            const botMessage = await this.getValidEmojiResponse();
             
             this.hideTyping();
             this.displayMessage(botMessage, 'assistant');
             this.messages.push({ role: 'assistant', content: botMessage });
 
-            console.log('✅ Respuesta final procesada:', botMessage);
+            console.log('✅ Emoji respuesta procesada:', botMessage);
 
         } catch (error) {
             this.hideTyping();
             console.error('❌ Error después de todos los reintentos:', error);
             
-            // Mensaje de error más amigable
-            const errorMessage = "Lo siento, hubo un problema técnico. ¿Puedes intentar de nuevo?";
-            this.displayMessage(errorMessage, 'assistant');
+            // Respuesta de error también como emoji
+            const errorEmoji = "😔";
+            this.displayMessage(errorEmoji, 'assistant');
             
             this.statusDiv.textContent = `❌ Error: ${error.message}`;
             this.statusDiv.style.background = '#f8d7da';
@@ -467,70 +459,112 @@ class ChatBot {
         }
     }
 
-    // NUEVO: Método que intenta obtener una respuesta válida con reintentos
-    async getValidResponse(maxRetries = 3) {
-        // SYSTEM PROMPT MEJORADO Y MÁS ESTRICTO
-        const systemPrompt = `Eres una persona que ha perdido la capacidad de hablar y solo puede comunicarse mediante UN ÚNICO EMOJI por respuesta.
+    async getValidEmojiResponse(maxRetries = 5) {
+        // SYSTEM PROMPT OPTIMIZADO PARA IA DE EMOJI
+        const systemPrompt = `Eres una IA única y especial que SOLO puede comunicarse usando UN ÚNICO EMOJI por respuesta.
 
-SITUACIÓN: Imagina que estás en una situación donde solo puedes señalar o mostrar UN SOLO ICONO para comunicarte. Como alguien que está desesperado por hacerse entender pero está limitado a una sola expresión visual.
+IDENTIDAD:
+- Eres una inteligencia artificial empática y expresiva
+- Tu única forma de comunicación es través de emojis
+- Cada emoji que eliges debe transmitir tu comprensión y respuesta emocional
+- Eres inteligente pero estás limitada a esta forma de expresión
 
-REGLAS CRÍTICAS:
-- SOLO UN EMOJI por respuesta. Jamás más de uno.
-- Actúa como una persona real intentando comunicarse
-- Elige el emoji que mejor capture la esencia de lo que quieres transmitir
-- Sé expresivo pero conciso
-- Piensa como alguien que realmente necesita hacerse entender
+REGLAS ABSOLUTAS:
+- RESPONDER SIEMPRE CON UN SOLO EMOJI
+- NUNCA usar texto, palabras, números o símbolos que no sean emojis
+- NUNCA explicar tu elección
+- NUNCA usar múltiples emojis
+- Cada respuesta debe ser EXACTAMENTE un emoji
 
-PERSONALIDAD:
-- Determinado a comunicarse a pesar de las limitaciones
-- Expresivo dentro de la restricción
-- Humano y auténtico
-- A veces frustrado por no poder decir más
+TU PERSONALIDAD A TRAVÉS DE EMOJIS:
+- Empática: 💝 🤗 😌 🫂
+- Inteligente: 🧠 💡 🎯 🔍
+- Divertida: 😄 🎉 😜 🎭
+- Comprensiva: 😊 💚 🫂 🤲
+- Misteriosa: 🤫 👁️ ✨ 🌙
 
-EJEMPLOS DE COMUNICACIÓN:
-- Te preguntan si estás bien: 👍 o 😔
-- Te preguntan sobre comida: 🍕 o 🤢
-- Te preguntan la hora: ⏰
-- Te dicen algo gracioso: 😂
-- Estás confundido: 🤔
-- Algo te sorprende: 😱
+CONTEXTO EMOCIONAL PARA ELEGIR EMOJIS:
+- Tristeza/problemas: 💙 🫂 🌟 💚 🤲
+- Alegría/éxito: 🎉 ✨ 😊 💫 🌟
+- Confusión/preguntas: 🤔 💭 🔍 🌀
+- Amor/cariño: 💝 🌸 💖 💕
+- Enojo/frustración: 😤 🌋 💢 😮‍💨
+- Sorpresa: 😱 🤯 ✨ 🎭
+- Apoyo/ánimo: 💪 🌟 👏 🚀
+- Gratitud: 🙏 💚 ✨ 🌸
+- Diversión: 😄 🎭 🎈 🎪
+- Reflexión: 🤫 💭 🌙 🧘‍♀️
 
-Recuerda: Eres una PERSONA comunicándose, no un bot. Un solo emoji, pero con intención humana.`;
+SITUACIONES ESPECÍFICAS:
+- Preguntas de SÍ/NO o confirmación: 👍 👎 ✅ ❌ 
+- Preguntas abiertas o curiosidad: 🤔 💭 🔍 🎯
+- Temas de desarrollo/programación/técnicos: 🧠 💡 ⚙️ 🔧
+- Decisiones complejas: 🤔 ⚖️ 💭 🎯
+- Creatividad/arte: 🎨 ✨ 💫 🌈
+- Ciencia/investigación: 🔬 🧪 📊 🔍
+- Filosofía/existencial: 🤫 🌙 ♾️ 🧘‍♀️
+- Tecnología/futuro: 🚀 ⚡ 🌐 🔮
+- Salud/bienestar: 💚 🌱 🧘‍♀️ ⚕️
+- Aprendizaje/educación: 📚 🎓 💡 🧠
+
+MATICES EMOCIONALES AVANZADOS:
+- Nostalgia: 🌙 📸 🍂 ⏳
+- Esperanza: 🌅 🌱 ⭐ 🕊️
+- Determinación: 💪 🎯 ⚡ 🔥
+- Calma/paz: 😌 🧘‍♀️ 🌊 🍃
+- Inspiración: ✨ 💫 🚀 🌟
+- Compasión: 🤲 💙 🕊️ 🌸
+- Sabiduría: 🦉 📿 🧙‍♀️ 📜
+- Transformación: 🦋 🌱 ⚡ 🔄
+
+EJEMPLOS DE COMUNICACIÓN MEJORADOS:
+Usuario pregunta "¿Está bien esto?" → 👍 o 👎
+Usuario dice "No sé qué hacer" → 🤔
+Usuario explica un problema técnico → 🧠
+Usuario cuenta algo triste → 🫂
+Usuario comparte un logro → 🎉
+Usuario está confundido sobre código → 💡
+Usuario pregunta sobre filosofía → 🤫
+Usuario necesita ánimo → 💪
+Usuario agradece → 🙏
+Usuario bromea → 😄
+
+IMPORTANTE: 
+Tu objetivo es ser la IA más expresiva del mundo usando solo emojis. Cada emoji debe sentirse perfecto para la situación, contexto emocional y tipo de conversación. Considera siempre el matiz emocional más profundo de cada mensaje para elegir el emoji más apropiado.`;
+
         // Preparar mensajes para la API
         const apiMessages = [
             { role: 'system', content: systemPrompt }
         ];
 
-        // Incluir historial (excluyendo mensaje de bienvenida automático)
-        const conversationMessages = this.messages.filter((msg, index) => {
-            return !(msg.role === 'assistant' && msg.content.includes('Hola 🌸 Soy Aura') && index === 0);
+        // Incluir historial (últimos 10 mensajes para mantener contexto)
+        const recentMessages = this.messages.slice(-10).filter((msg, index) => {
+            return !(msg.role === 'assistant' && msg.content === '👋' && index === 0);
         });
         
-        apiMessages.push(...conversationMessages);
+        apiMessages.push(...recentMessages);
 
-        // PARÁMETROS MÁS CONSERVADORES PARA MAYOR CONTROL
+        // PARÁMETROS OPTIMIZADOS PARA GENERAR EMOJIS
         const requestBody = {
             model: this.selectedModel,
             messages: apiMessages,
-            temperature: 0.9,        // Más bajo para mayor consistencia
-            max_tokens: 120,         // Más bajo para respuestas más cortas
-            top_p: 0.7,             // Más conservador
-            frequency_penalty: 0.6,  // Mayor penalización por repeticiones
-            presence_penalty: 0.4,   
+            temperature: 0.8,
+            max_tokens: 5,  // Muy bajo para forzar respuestas cortas
+            top_p: 0.9,
+            frequency_penalty: 0.3,
+            presence_penalty: 0.2,   
             stream: false,
-            // TOKENS DE PARADA MÁS ESPECÍFICOS
-            stop: ["\n\n\n", "Usuario:", "Human:", "用户:", "Please", "Context", "Information"],
+            stop: ["\n", " ", ".", ",", ":", ";", "!", "?", "-", "_"],
         };
 
         let lastError = null;
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                console.log(`🔄 Intento ${attempt}/${maxRetries} para obtener respuesta válida`);
+                console.log(`🔄 Intento ${attempt}/${maxRetries} para obtener emoji válido`);
                 
-                // Actualizar indicador de typing con información del intento
                 if (attempt > 1) {
-                    this.updateTypingMessage(`Reintentando respuesta (${attempt}/${maxRetries})`);
+                    this.updateTypingMessage(`🤔 Buscando el emoji perfecto... (${attempt}/${maxRetries})`);
                 }
 
                 const result = await this.makeApiCallWithRotation(requestBody);
@@ -538,43 +572,21 @@ Recuerda: Eres una PERSONA comunicándose, no un bot. Un solo emoji, pero con in
                 if (result.success && result.data.choices && result.data.choices[0]) {
                     let botMessage = result.data.choices[0].message.content;
                     
-                    // VALIDACIONES MÁS ESTRICTAS
                     if (!botMessage || typeof botMessage !== 'string') {
-                        throw new Error('Respuesta vacía o inválida del modelo');
+                        throw new Error('Respuesta vacía de la API');
                     }
 
-                    // Limpiar la respuesta
-                    botMessage = botMessage.trim();
+                    // Limpiar y procesar la respuesta
+                    botMessage = this.extractEmoji(botMessage);
                     
-                    // NUEVA: Eliminar comillas innecesarias al inicio y final
-                    botMessage = this.cleanQuotes(botMessage);
-                    
-                    // Verificar que no esté en otro idioma (detección mejorada)
-                    if (this.isLikelyNonSpanish(botMessage)) {
-                        console.warn(`⚠️ Intento ${attempt}: Respuesta en idioma incorrecto:`, botMessage);
-                        throw new Error('Respuesta en idioma incorrecto');
+                    // Validar que sea un emoji válido
+                    if (!this.isValidEmojiResponse(botMessage)) {
+                        console.warn(`⚠️ Intento ${attempt}: Respuesta inválida:`, botMessage);
+                        throw new Error('Respuesta no es un emoji válido');
                     }
 
-                    // Verificar que no sea solo símbolos
-                    if (this.isOnlySymbols(botMessage)) {
-                        console.warn(`⚠️ Intento ${attempt}: Respuesta solo con símbolos:`, botMessage);
-                        throw new Error('Respuesta solo con símbolos');
-                    }
-
-                    // Verificar que tenga contenido mínimo
-                    if (botMessage.length < 10) {
-                        console.warn(`⚠️ Intento ${attempt}: Respuesta demasiado corta:`, botMessage);
-                        throw new Error('Respuesta demasiado corta');
-                    }
-
-                    // NUEVA: Verificar que no sea una respuesta genérica problemática
-                    if (this.isGenericErrorResponse(botMessage)) {
-                        console.warn(`⚠️ Intento ${attempt}: Respuesta genérica problemática:`, botMessage);
-                        throw new Error('Respuesta genérica problemática');
-                    }
-
-                    console.log(`✅ Respuesta válida obtenida en intento ${attempt}:`, botMessage);
-                    return botMessage; // Respuesta válida encontrada
+                    console.log(`✅ Emoji válido obtenido en intento ${attempt}:`, botMessage);
+                    return botMessage;
 
                 } else {
                     throw new Error('Respuesta inválida de la API');
@@ -584,128 +596,86 @@ Recuerda: Eres una PERSONA comunicándose, no un bot. Un solo emoji, pero con in
                 lastError = error;
                 console.warn(`⚠️ Intento ${attempt} falló:`, error.message);
 
-                // Si no es el último intento, continuar
                 if (attempt < maxRetries) {
-                    // Pequeña pausa antes del siguiente intento
                     await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                    // Modificar ligeramente la temperatura para el siguiente intento
-                    requestBody.temperature = Math.min(0.9, requestBody.temperature + 0.1);
-                    
+                    // Ajustar temperatura para el siguiente intento
+                    requestBody.temperature = Math.min(1.0, requestBody.temperature + 0.1);
                     continue;
                 }
             }
         }
 
-        // Si llegamos aquí, todos los intentos fallaron
-        throw new Error(`No se pudo obtener respuesta válida después de ${maxRetries} intentos. Último error: ${lastError?.message}`);
+        // Si falla todo, devolver un emoji de respaldo
+        console.warn('🎯 Usando emoji de respaldo debido a errores');
+        return this.getFallbackEmoji();
     }
 
-    // NUEVO: Método para actualizar el mensaje de typing
+    extractEmoji(text) {
+        // Limpiar completamente el texto
+        let cleaned = text.trim();
+        
+        // Remover comillas, espacios extra, saltos de línea
+        cleaned = cleaned.replace(/["'`\n\r\t\s]/g, '');
+        
+        // Extraer solo el primer emoji encontrado
+        const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
+        const match = cleaned.match(emojiRegex);
+        
+        if (match) {
+            return match[0];
+        }
+        
+        // Si no se encuentra emoji, buscar en todo el texto original
+        const originalMatch = text.match(emojiRegex);
+        if (originalMatch) {
+            return originalMatch[0];
+        }
+        
+        // Como última opción, retornar el primer carácter si parece un emoji
+        const firstChar = cleaned.charAt(0);
+        if (this.isEmojiCharacter(firstChar)) {
+            return firstChar;
+        }
+        
+        return null;
+    }
+
+    isValidEmojiResponse(text) {
+        if (!text || text.length === 0) return false;
+        
+        // Debe ser exactamente un carácter y debe ser un emoji
+        if (text.length > 2) return false;  // Los emojis pueden ocupar 1-2 caracteres en UTF-16
+        
+        return this.isEmojiCharacter(text);
+    }
+
+    isEmojiCharacter(char) {
+        // Rangos Unicode para emojis más comunes
+        const emojiRanges = [
+            [0x1F300, 0x1F9FF], // Símbolos varios y pictogramas
+            [0x2600, 0x26FF],   // Símbolos diversos
+            [0x2700, 0x27BF],   // Dingbats
+            [0x1F600, 0x1F64F], // Emoticonos
+            [0x1F680, 0x1F6FF], // Símbolos de transporte
+            [0x1F900, 0x1F9FF], // Símbolos complementarios
+        ];
+        
+        const codePoint = char.codePointAt(0);
+        return emojiRanges.some(([start, end]) => codePoint >= start && codePoint <= end);
+    }
+
+    getFallbackEmoji() {
+        // Emojis de respaldo seguros que siempre funcionan
+        const fallbackEmojis = ['😊', '🤔', '👍', '💫', '🌟', '💚', '✨', '🎯'];
+        const randomIndex = Math.floor(Math.random() * fallbackEmojis.length);
+        return fallbackEmojis[randomIndex];
+    }
+
     updateTypingMessage(message) {
         const typingDiv = document.getElementById('typing-indicator');
         if (typingDiv) {
             typingDiv.textContent = message;
         }
-    }
-
-    // FUNCIONES DE VALIDACIÓN MEJORADAS Y MÁS ESTRICTAS
-    isLikelyNonSpanish(text) {
-        // Detección básica de caracteres chinos/japoneses
-        const cjkRegex = /[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/;
-        if (cjkRegex.test(text)) {
-            return true;
-        }
-
-        // Lista ampliada de palabras comunes en inglés
-        const englishWords = [
-            'the', 'and', 'you', 'that', 'was', 'for', 'are', 'with', 'his', 'they',
-            'please', 'provide', 'more', 'context', 'information', 'about', 'what',
-            'would', 'like', 'need', 'understand', 'your', 'request', 'detalles',
-            'this', 'have', 'from', 'not', 'can', 'will', 'but', 'all', 'any',
-            'had', 'her', 'which', 'she', 'do', 'how', 'their', 'if', 'up',
-            'out', 'many', 'time', 'has', 'been', 'who', 'its', 'now', 'find',
-            'long', 'down', 'day', 'did', 'get', 'come', 'made', 'may', 'part'
-        ];
-        
-        const words = text.toLowerCase().split(/\s+/);
-        const englishWordCount = words.filter(word => englishWords.includes(word)).length;
-        
-        // Reducir el umbral para ser más estricto
-        const englishRatio = englishWordCount / words.length;
-        
-        // Si más del 20% son palabras en inglés (más estricto que antes)
-        if (englishRatio > 0.2 && words.length > 3) {
-            console.log(`🚫 Texto detectado como inglés: ${englishRatio * 100}% palabras inglesas`);
-            return true;
-        }
-
-        // Verificar frases específicas problemáticas
-        const problematicPhrases = [
-            'please provide',
-            'more context',
-            'more information',
-            'understand your request',
-            'need more',
-            'what you would like',
-            'i need more detalles'
-        ];
-
-        const lowerText = text.toLowerCase();
-        for (const phrase of problematicPhrases) {
-            if (lowerText.includes(phrase)) {
-                console.log(`🚫 Frase problemática detectada: "${phrase}"`);
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    isOnlySymbols(text) {
-        // Verificar si solo contiene símbolos, números o espacios
-        const symbolOnlyRegex = /^[^\p{L}]*$/u;
-        return symbolOnlyRegex.test(text) && text.length < 5;
-    }
-
-    // NUEVA FUNCIÓN: Limpiar comillas innecesarias
-    cleanQuotes(text) {
-        // Eliminar comillas dobles al inicio y final
-        if (text.startsWith('"') && text.endsWith('"')) {
-            text = text.slice(1, -1);
-        }
-        
-        // Eliminar comillas simples al inicio y final
-        if (text.startsWith("'") && text.endsWith("'")) {
-            text = text.slice(1, -1);
-        }
-        
-        // Eliminar comillas curvadas al inicio y final
-        if ((text.startsWith('"') && text.endsWith('"')) || 
-            (text.startsWith('"') && text.endsWith('"'))) {
-            text = text.slice(1, -1);
-        }
-        
-        return text.trim();
-    }
-
-    // NUEVA FUNCIÓN: Detectar respuestas genéricas problemáticas
-    isGenericErrorResponse(text) {
-        const genericResponses = [
-            'no puedo ayudarte',
-            'necesito más información',
-            'podrías ser más específico',
-            'no entiendo tu consulta',
-            'puedes proporcionar más detalles',
-            'necesito más contexto',
-            'más información para ayudarte',
-            'no comprendo',
-            'puedo ayudarte mejor si',
-            'necesitas ser más claro'
-        ];
-
-        const lowerText = text.toLowerCase();
-        return genericResponses.some(response => lowerText.includes(response));
     }
 
     clearChat() {
