@@ -1,0 +1,2555 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatBot Aura</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/favicon.ico" type="image/x-icon">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- Google API para logout completo -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        /* Tema oscuro */
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        /* Loading container */
+        .loading-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .loading-spinner {
+            text-align: center;
+            color: white;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Auth container */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .auth-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        body.dark-theme .auth-card {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .auth-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        body.dark-theme .auth-header h1 {
+            color: #9ca3af;
+        }
+
+        .google-btn, .anonymous-btn {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .google-btn {
+            background: white;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .anonymous-btn {
+            background: #667eea;
+            color: white;
+        }
+
+        .google-btn:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px);
+        }
+
+        .anonymous-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+        }
+
+        .auth-divider {
+            margin: 20px 0;
+            color: #666;
+        }
+
+        /* Términos y condiciones estilos */
+        .terms-container {
+            margin: 20px 0;
+        }
+        
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        body.dark-theme .terms-checkbox {
+            color: #cbd5e0;
+        }
+        
+        .terms-checkbox input[type="checkbox"] {
+            margin-top: 2px;
+            cursor: pointer;
+        }
+        
+        .terms-link {
+            color: #4285f4;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .terms-link:hover {
+            text-decoration: underline;
+        }
+        
+        .login-buttons {
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .login-buttons.enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        /* Modal para términos */
+        .terms-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .terms-modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        body.dark-theme .terms-modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+        
+        .terms-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        body.dark-theme .terms-modal-header {
+            border-bottom-color: #4a5568;
+        }
+        
+        .terms-modal-close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .terms-modal-close:hover {
+            color: #000;
+        }
+        
+        body.dark-theme .terms-modal-close:hover {
+            color: #fff;
+        }
+        
+        .terms-content {
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        body.dark-theme .terms-content {
+            color: #e2e8f0;
+        }
+        
+        .terms-content h3 {
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        body.dark-theme .terms-content h3 {
+            color: #9ca3af;
+        }
+        
+        .terms-content h2 {
+            margin-top: 30px;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        
+        body.dark-theme .terms-content h2 {
+            color: #9ca3af;
+            border-bottom-color: #4a5568;
+        }
+        
+        .terms-content p {
+            margin-bottom: 15px;
+        }
+        
+        .terms-content .legal-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        body.dark-theme .terms-content .legal-info {
+            background: #4a5568;
+        }
+        
+        .terms-content .legal-info p {
+            margin-bottom: 8px;
+        }
+        
+        .terms-accept-btn {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 20px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+        
+        .terms-accept-btn:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+        }
+
+        /* Enlaces legales en el footer del auth */
+        .legal-footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        
+        body.dark-theme .legal-footer {
+            border-top-color: #4a5568;
+        }
+        
+        .legal-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 12px;
+        }
+        
+        .legal-links a {
+            color: #666;
+            text-decoration: none;
+        }
+        
+        body.dark-theme .legal-links a {
+            color: #9ca3af;
+        }
+        
+        .legal-links a:hover {
+            color: #4285f4;
+            text-decoration: underline;
+        }
+
+        /* ESTILOS PRINCIPALES DEL CHATBOT VISUAL */
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body.dark-theme .container {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 0 20px 20px 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 5px 0 20px rgba(0,0,0,0.1);
+        }
+
+        body.dark-theme .sidebar {
+            background: rgba(45, 55, 72, 0.95);
+            color: #e2e8f0;
+        }
+
+        .sidebar-header {
+            margin-bottom: 30px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar-container {
+            position: relative;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+        }
+
+        .online-indicator {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .user-name {
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        body.dark-theme .user-name {
+            color: #e2e8f0;
+        }
+
+        .user-status {
+            font-size: 0.9em;
+            color: #10b981;
+        }
+
+        .sidebar-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-btn {
+            padding: 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-theme .sidebar-btn {
+            background: rgba(156, 163, 175, 0.1);
+            color: #9ca3af;
+        }
+
+        .sidebar-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        body.dark-theme .sidebar-btn:hover {
+            background: rgba(156, 163, 175, 0.2);
+        }
+
+        /* Main content - CHATBOT VISUAL */
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+
+        body.dark-theme .chat-container {
+            background: #2d3748;
+        }
+
+        /* Panel del personaje */
+        .character-panel {
+            width: 350px;
+            background: linear-gradient(180deg, #f8f9ff 0%, #e8f0ff 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body.dark-theme .character-panel {
+            background: linear-gradient(180deg, #374151 0%, #4b5563 100%);
+        }
+
+        .character-container {
+            position: relative;
+            width: 250px;
+            height: 300px;
+            margin-bottom: 20px;
+        }
+
+        /* Cabeza del personaje */
+        .character-head {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 50%;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border: 3px solid #fff;
+        }
+
+        body.dark-theme .character-head {
+            border-color: #4a5568;
+        }
+
+        .character-face {
+            font-size: 4em;
+            transition: all 0.5s ease;
+            position: relative;
+            line-height: 1;
+        }
+
+        /* Cuello */
+        .character-neck {
+            width: 30px;
+            height: 40px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 15px 15px;
+            transition: all 0.3s ease;
+        }
+
+        /* Cuerpo del personaje */
+        .character-body {
+            width: 120px;
+            height: 140px;
+            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            border-radius: 60px 60px 20px 20px;
+            position: absolute;
+            top: 130px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 3px solid #fff;
+        }
+
+        body.dark-theme .character-body {
+            border-color: #4a5568;
+        }
+
+        /* Brazos */
+        .character-arms {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 180px;
+            height: 60px;
+        }
+
+        .arm {
+            width: 25px;
+            height: 80px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 15px;
+            position: absolute;
+            transition: all 0.3s ease;
+            border: 2px solid #fff;
+        }
+
+        body.dark-theme .arm {
+            border-color: #4a5568;
+        }
+
+        .arm.left {
+            left: 0;
+            transform: rotate(-20deg);
+            transform-origin: top center;
+        }
+
+        .arm.right {
+            right: 0;
+            transform: rotate(20deg);
+            transform-origin: top center;
+        }
+
+        /* Piernas */
+        .character-legs {
+            position: absolute;
+            top: 250px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 60px;
+        }
+
+        .leg {
+            width: 25px;
+            height: 60px;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            border-radius: 15px;
+            position: absolute;
+            transition: all 0.3s ease;
+            border: 2px solid #fff;
+        }
+
+        body.dark-theme .leg {
+            border-color: #4a5568;
+        }
+
+        .leg.left {
+            left: 15px;
+        }
+
+        .leg.right {
+            right: 15px;
+        }
+
+        /* Pies */
+        .foot {
+            width: 35px;
+            height: 20px;
+            background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+            border-radius: 10px;
+            position: absolute;
+            bottom: -15px;
+            transition: all 0.3s ease;
+        }
+
+        .foot.left {
+            left: -5px;
+        }
+
+        .foot.right {
+            right: -5px;
+        }
+
+        /* Efectos de emoción para todo el personaje */
+        .character-container.happy .character-head {
+            transform: translateX(-50%) scale(1.1);
+            background: linear-gradient(135deg, #ffd93d 0%, #ff9800 100%);
+        }
+
+        .character-container.happy .character-body {
+            transform: translateX(-50%) scale(1.05);
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .character-container.happy .arm {
+            transform: rotate(0deg) translateY(-5px);
+        }
+
+        .character-container.thinking .character-head {
+            transform: translateX(-50%) rotate(10deg);
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+        }
+
+        .character-container.thinking .arm.right {
+            transform: rotate(-30deg) translateY(-10px);
+        }
+
+        .character-container.excited {
+            animation: bounce 0.6s ease infinite alternate;
+        }
+
+        .character-container.excited .character-head {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+        }
+
+        .character-container.excited .character-body {
+            background: linear-gradient(135deg, #ffd93d 0%, #ff9800 100%);
+        }
+
+        .character-container.excited .arm {
+            transform: rotate(45deg) translateY(-10px);
+            animation: wave 0.8s ease infinite;
+        }
+
+        .character-container.confused .character-head {
+            transform: translateX(-50%) rotate(-5deg) scale(0.95);
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+        }
+
+        .character-container.confused .arm.left {
+            transform: rotate(-45deg);
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-15px); }
+        }
+
+        @keyframes wave {
+            0%, 100% { transform: rotate(45deg) translateY(-10px); }
+            50% { transform: rotate(60deg) translateY(-15px); }
+        }
+
+        /* Partículas flotantes */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            font-size: 1.2em;
+            opacity: 0.7;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+                opacity: 0.7;
+            }
+            50% { 
+                transform: translateY(-20px) rotate(180deg);
+                opacity: 0.3;
+            }
+        }
+
+        .character-name h3 {
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        body.dark-theme .character-name h3 {
+            color: #9ca3af;
+        }
+
+        .character-name p {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        body.dark-theme .character-name p {
+            color: #9ca3af;
+        }
+
+        /* Panel de chat */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #fafbfc;
+        }
+
+        body.dark-theme .chat-panel {
+            background: #1a202c;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            position: relative;
+        }
+
+        body.dark-theme .chat-header {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .config-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+
+        .config-button:hover {
+            background: rgba(255,255,255,0.3);
+            transform: rotate(90deg);
+        }
+
+        .messages-container {
+            flex: 1;
+            width: 100%;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            font-size: 1em;
+            line-height: 1.4;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+        }
+
+        body.dark-theme .message.user {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .message.bot {
+            background: #f0f0f0;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+            font-size: 2em;
+            padding: 16px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        body.dark-theme .message.bot {
+            background: #4a5568;
+            color: #e2e8f0;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-indicator {
+            background: #f0f0f0;
+            color: #666;
+            align-self: flex-start;
+            font-style: italic;
+            border-bottom-left-radius: 5px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        body.dark-theme .typing-indicator {
+            background: #4a5568;
+            color: #9ca3af;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Input area */
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        body.dark-theme .input-container {
+            background: #2d3748;
+            border-top-color: #4a5568;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        body.dark-theme .message-input {
+            background: #374151;
+            border-color: #4b5563;
+            color: #e2e8f0;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-button {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body.dark-theme .send-button {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .send-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .send-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-bar {
+            font-size: 0.9em;
+            text-align: center;
+            color: #666;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+        }
+
+        body.dark-theme .status-bar {
+            background: rgba(74, 85, 104, 0.5);
+            color: #9ca3af;
+        }
+
+        /* Modal de configuración */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        body.dark-theme .modal-content {
+            background-color: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        body.dark-theme .modal h2 {
+            color: #e2e8f0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        body.dark-theme .form-group label {
+            color: #cbd5e0;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        body.dark-theme .form-group input,
+        body.dark-theme .form-group select {
+            background: #374151;
+            border-color: #4b5563;
+            color: #e2e8f0;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        body.dark-theme .btn-primary {
+            background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        body.dark-theme .btn-secondary {
+            background: #374151;
+            color: #e2e8f0;
+            border-color: #4b5563;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        body.dark-theme .close {
+            color: #9ca3af;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        body.dark-theme .close:hover {
+            color: #e2e8f0;
+        }
+
+        /* Efectos especiales */
+        .sparkle {
+            position: absolute;
+            color: #ffd700;
+            font-size: 1em;
+            pointer-events: none;
+            animation: sparkle 1s ease-out forwards;
+        }
+
+        @keyframes sparkle {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(360deg);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-radius: 0;
+                flex-direction: row;
+                justify-content: space-between;
+            }
+            
+            .chat-container {
+                width: 95vw;
+                height: 70vh;
+                flex-direction: column;
+            }
+            
+            .character-panel {
+                width: 100%;
+                height: 200px;
+            }
+            
+            .character-container {
+                width: 200px;
+                height: 180px;
+                transform: scale(0.7);
+            }
+        }
+
+        /* Ocultar elementos durante loading */
+        #chat-container {
+            display: none;
+        }
+
+        /* Mostrar chat cuando la app esté activa */
+        .container[style*="flex"] #chat-container {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Pantalla de Loading inicial -->
+    <div id="loading-container" class="loading-container">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>🌸 Aura</p>
+            <small>Cargando...</small>
+        </div>
+    </div>
+
+    <!-- Pantalla de Login (oculta inicialmente) -->
+    <div id="auth-container" class="auth-container" style="display: none;">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>🌸 Aura</h1>
+                <p>Tu compañía empática siempre disponible</p>
+            </div>
+            
+            <div class="auth-content">
+                <h2>Bienvenido/a</h2>
+                <p>Inicia sesión para comenzar tu conversación</p>
+                
+                <!-- Términos y condiciones -->
+                <div class="terms-container">
+                    <div class="terms-checkbox">
+                        <input type="checkbox" id="terms-checkbox">
+                        <label for="terms-checkbox">
+                            Acepto los <a href="#" class="terms-link" id="terms-link">términos y condiciones</a> y la política de privacidad
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="login-buttons" id="login-buttons">
+                    <button id="google-login-btn" class="google-btn">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Continuar con Google
+                    </button>
+                    
+                    <div class="auth-divider">
+                        <span>o</span>
+                    </div>
+                    
+                    <button id="anonymous-btn" class="anonymous-btn">
+                        Continuar como invitado
+                    </button>
+                </div>
+
+                <!-- Enlaces legales -->
+                <div class="legal-footer">
+                    <div class="legal-links">
+                        <a href="#" id="legal-notice-link">Aviso Legal</a>
+                        <a href="#" id="privacy-policy-link">Política de Privacidad</a>
+                        <a href="#" id="contact-link">Contacto</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Términos y Condiciones -->
+    <div id="terms-modal" class="terms-modal">
+        <div class="terms-modal-content">
+            <div class="terms-modal-header">
+                <h2 id="modal-title">Términos y Condiciones de Uso</h2>
+                <span class="terms-modal-close" id="terms-modal-close">&times;</span>
+            </div>
+            <div class="terms-content" id="modal-content">
+                <!-- Contenido por defecto: Términos y Condiciones -->
+                <div id="terms-content">
+                    <h3>1. Aceptación de los Términos</h3>
+                    <p>Al utilizar Aura, aceptas estar sujeto a estos términos y condiciones. Si no estás de acuerdo, no utilices el servicio.</p>
+                    
+                    <h3>2. Descripción del Servicio</h3>
+                    <p>Aura es un chatbot de inteligencia artificial diseñado para proporcionar compañía empática y conversación. El servicio utiliza tecnología de IA desarrollada por DeepSeek para generar respuestas.</p>
+                    
+                    <h3>3. Uso Responsable</h3>
+                    <p>Te comprometes a:</p>
+                    <p>• Utilizar el servicio de manera legal y ética</p>
+                    <p>• No compartir información personal sensible</p>
+                    <p>• No utilizar el servicio para actividades ilegales o dañinas</p>
+                    <p>• Respetar los límites del sistema y otros usuarios</p>
+                    
+                    <h3>4. Privacidad y Datos</h3>
+                    <p>Respetamos tu privacidad. Las conversaciones pueden ser procesadas para mejorar el servicio. No compartimos información personal con terceros sin consentimiento. Los datos pueden ser procesados según las políticas de DeepSeek.</p>
+                    
+                    <h3>5. Limitaciones del Servicio</h3>
+                    <p>Aura es un sistema de IA y puede:</p>
+                    <p>• Cometer errores o proporcionar información incorrecta</p>
+                    <p>• No estar disponible temporalmente</p>
+                    <p>• Tener limitaciones en sus respuestas</p>
+                    <p>• Generar contenido impredecible o inapropiado</p>
+                    
+                    <h3>6. Exención de Responsabilidad</h3>
+                    <p><strong>IMPORTANTE:</strong> No nos hacemos responsables de:</p>
+                    <p>• Cualquier daño directo, indirecto, incidental o consecuencial derivado del uso del servicio</p>
+                    <p>• La precisión, confiabilidad o completitud de las respuestas generadas</p>
+                    <p>• Pérdidas económicas, emocionales o de cualquier tipo</p>
+                    <p>• Interrupciones del servicio o pérdida de datos</p>
+                    <p>• Decisiones tomadas basándose en las respuestas del chatbot</p>
+                    
+                    <h3>7. Limitación de Garantías</h3>
+                    <p>El servicio se proporciona "tal como está" sin garantías de ningún tipo. No garantizamos que el servicio sea ininterrumpido, libre de errores o completamente seguro.</p>
+                    
+                    <h3>8. Indemnización</h3>
+                    <p>Al usar este servicio, aceptas indemnizar y eximir de responsabilidad a los operadores del servicio de cualquier reclamación o daño que pueda surgir de tu uso del mismo.</p>
+                    
+                    <h3>9. Modificaciones</h3>
+                    <p>Nos reservamos el derecho de modificar estos términos en cualquier momento. Los cambios serán notificados a través del servicio.</p>
+                    
+                    <h3>10. Jurisdicción</h3>
+                    <p>Estos términos se rigen por las leyes aplicables. Cualquier disputa será resuelta en los tribunales competentes.</p>
+                    
+                    <h3>11. Contacto</h3>
+                    <p>Para preguntas sobre estos términos, puedes contactarnos a través del sistema de soporte del servicio.</p>
+                    
+                    <div style="background-color: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                        <h4 style="color: #856404; margin-top: 0;">⚠️ Aviso Importante sobre Salud Mental</h4>
+                        <p style="color: #856404; margin-bottom: 0;"><strong>Aura NO es un psicólogo, psiquiatra, terapeuta o profesional de la salud mental.</strong> Este servicio no proporciona asesoramiento médico, psicológico o terapéutico profesional. No debe utilizarse como sustituto de la atención médica o psicológica profesional.</p>
+                        <p style="color: #856404; margin-bottom: 0;">Si experimentas problemas de salud mental, pensamientos suicidas, crisis emocionales o cualquier condición que requiera atención profesional, por favor busca ayuda inmediata de un profesional de la salud mental calificado o contacta con los servicios de emergencias locales.</p>
+                    </div>
+                    
+                    <p><strong>Última actualización:</strong> Julio 2024</p>
+                </div>
+
+                <!-- Contenido del Aviso Legal -->
+                <div id="legal-notice-content" style="display: none;">
+                    <h2>AVISO LEGAL</h2>
+                    
+                    <p>En cumplimiento de lo establecido en la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico, se informa a los usuarios del presente sitio web de los siguientes datos:</p>
+                    
+                    <div class="legal-info">
+                        <p><strong>Titular del sitio web:</strong> Eduardo Robles Russo</p>
+                        <p><strong>NIF:</strong> 53964862P</p>
+                        <p><strong>Domicilio:</strong> Calle Febo nº27 2ªIzquierda</p>
+                        <p><strong>Correo electrónico:</strong> eduroblesrusso82@gmail.com</p>
+                    </div>
+                    
+                    <h3>Objeto</h3>
+                    <p>El presente sitio web tiene por objeto proporcionar un servicio de chatbot de inteligencia artificial denominado "Aura" para compañía empática y conversación.</p>
+                    
+                    <h3>Condiciones de Uso</h3>
+                    <p>El acceso y uso de este sitio web se rige por las presentes condiciones legales así como por la normativa aplicable. El acceso al sitio web es gratuito salvo en lo relativo al coste de la conexión a través de la red de telecomunicaciones suministrada por el proveedor de acceso contratado por los usuarios.</p>
+                    
+                    <h3>Responsabilidad</h3>
+                    <p>El titular del sitio web no se hace responsable de los daños y perjuicios que pudieran derivarse del uso incorrecto del presente sitio web.</p>
+                    
+                    <h3>Propiedad Intelectual</h3>
+                    <p>Los contenidos, diseños, estructura, selección, ordenación y presentación de los elementos contenidos en este sitio web están protegidos por derechos de propiedad intelectual e industrial.</p>
+                    
+                    <h3>Modificaciones</h3>
+                    <p>El titular se reserva el derecho a realizar, en cualquier momento y sin previo aviso, modificaciones y actualizaciones de la información contenida en el sitio web.</p>
+                    
+                    <p><strong>Última actualización:</strong> Enero 2025</p>
+                </div>
+
+                <!-- Contenido de Política de Privacidad -->
+                <div id="privacy-policy-content" style="display: none;">
+                    <h2>POLÍTICA DE PRIVACIDAD</h2>
+                    
+                    <p>En cumplimiento del Reglamento General de Protección de Datos (RGPD) UE 2016/679 y la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales, informamos sobre el tratamiento de datos personales.</p>
+                    
+                    <h3>Responsable del Tratamiento</h3>
+                    <div class="legal-info">
+                        <p><strong>Responsable:</strong> Eduardo Robles Russo</p>
+                        <p><strong>NIF:</strong> 53964862P</p>
+                        <p><strong>Domicilio:</strong> Calle Febo nº27 2ªIzquierda</p>
+                        <p><strong>Correo electrónico:</strong> eduroblesrusso82@gmail.com</p>
+                    </div>
+                    
+                    <h3>Datos Recopilados</h3>
+                    <p>Los datos que recopilamos incluyen:</p>
+                    <p>• Información de perfil (nombre, email, foto) si inicias sesión con Google</p>
+                    <p>• Mensajes y conversaciones con el chatbot</p>
+                    <p>• Datos técnicos de navegación</p>
+                    
+                    <h3>Finalidad del Tratamiento</h3>
+                    <p>Utilizamos tus datos para:</p>
+                    <p>• Proporcionar el servicio de chatbot</p>
+                    <p>• Mejorar la experiencia del usuario</p>
+                    <p>• Personalizar las respuestas</p>
+                    
+                    <h3>Base Legal</h3>
+                    <p>El tratamiento se basa en el consentimiento del usuario y en la ejecución del servicio solicitado.</p>
+                    
+                    <h3>Conservación de Datos</h3>
+                    <p>Los datos se conservarán mientras sea necesario para proporcionar el servicio y cumplir con las obligaciones legales.</p>
+                    
+                    <h3>Derechos del Usuario</h3>
+                    <p>Tienes derecho a:</p>
+                    <p>• Acceder a tus datos personales</p>
+                    <p>• Rectificar datos inexactos</p>
+                    <p>• Suprimir tus datos</p>
+                    <p>• Limitar el tratamiento</p>
+                    <p>• Portabilidad de datos</p>
+                    <p>• Oponerte al tratamiento</p>
+                    
+                    <h3>Contacto</h3>
+                    <p>Para ejercer tus derechos, contacta con: eduroblesrusso82@gmail.com</p>
+                    
+                    <p><strong>Última actualización:</strong> Enero 2025</p>
+                </div>
+
+                <!-- Contenido de Contacto -->
+                <div id="contact-content" style="display: none;">
+                    <h2>CONTACTO</h2>
+                    
+                    <p>Para cualquier consulta, sugerencia o ejercicio de derechos, puedes contactar con nosotros:</p>
+                    
+                    <div class="legal-info">
+                        <p><strong>Responsable:</strong> Eduardo Robles Russo</p>
+                        <p><strong>NIF:</strong> 53964862P</p>
+                        <p><strong>Domicilio:</strong> Calle Febo nº27 2ªIzquierda</p>
+                        <p><strong>Correo electrónico:</strong> eduroblesrusso82@gmail.com</p>
+                    </div>
+                    
+                    <h3>Horario de Atención</h3>
+                    <p>Responderemos a tus consultas en un plazo máximo de 72 horas laborables.</p>
+                    
+                    <h3>Tipos de Consultas</h3>
+                    <p>• Soporte técnico</p>
+                    <p>• Ejercicio de derechos de protección de datos</p>
+                    <p>• Sugerencias y mejoras</p>
+                    <p>• Información general sobre el servicio</p>
+                    
+                    <p><strong>Nota:</strong> Para consultas relacionadas con protección de datos, es importante que identifiques claramente tu solicitud y adjuntes copia de tu documento de identidad.</p>
+                </div>
+            </div>
+            <button class="terms-accept-btn" id="terms-accept-btn">Aceptar y Cerrar</button>
+        </div>
+    </div>
+
+    <!-- Aplicación Principal (oculta inicialmente) -->
+    <div id="app-container" class="container" style="display: none;">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="user-profile">
+                    <div class="user-avatar-container">
+                        <img id="user-avatar" class="user-avatar" src="" alt="">
+                        <div class="online-indicator"></div>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name" id="user-name-sidebar">serenly</div>
+                        <div class="user-status">● Online</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sidebar-actions">
+                <button class="sidebar-btn" title="Configuración" class="config-button" id="config-btn">⚙️</button>
+                
+                <button class="sidebar-btn" title="Cambiar Tema" id="theme-toggle-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                    </svg>
+                </button>
+                <button class="sidebar-btn" title="Cerrar Sesión" id="logout-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16,17 21,12 16,7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chat Container con diseño visual -->
+            <div class="chat-container">
+                <!-- Panel del personaje -->
+                <div class="character-panel">
+                    <div class="particles"></div>
+                    
+                    <div class="character-container" id="character-container">
+                        <!-- Cabeza con emoji como cara -->
+                        <div class="character-head">
+                            <div class="character-face" id="character-face">😊</div>
+                        </div>
+                        
+                        <!-- Cuello -->
+                        <div class="character-neck"></div>
+                        
+                        <!-- Cuerpo -->
+                        <div class="character-body" id="character-body"></div>
+                        
+                        <!-- Brazos -->
+                        <div class="character-arms">
+                            <div class="arm left"></div>
+                            <div class="arm right"></div>
+                        </div>
+                        
+                        <!-- Piernas -->
+                        <div class="character-legs">
+                            <div class="leg left">
+                                <div class="foot left"></div>
+                            </div>
+                            <div class="leg right">
+                                <div class="foot right"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="emoji-bubble" id="emoji-bubble"></div>
+                    </div>
+                    
+                    <div class="character-name">
+                        <h3>Aura</h3>
+                        <p>Tu compañía empática</p>
+                    </div>
+                </div>
+
+                <!-- Panel de chat -->
+                <div class="chat-panel">
+                    <div class="chat-header">
+                        💬 Chat con Aura
+                        <button class="config-button" id="config-btn-header">⚙️</button>
+                    </div>
+                    
+                    <div class="messages-container" id="messages-container">
+                        <!-- Los mensajes aparecerán aquí -->
+                    </div>
+                    
+                    <div class="input-container">
+                        <div class="input-wrapper">
+                            <input 
+                                type="text" 
+                                class="message-input" 
+                                id="message-input" 
+                                placeholder="Escribe tu mensaje aquí..."
+                                disabled
+                            >
+                            <button class="send-button" id="send-button" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="m5 12 7-7 7 7"></path>
+                                    <path d="M12 19V5"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="status-bar" id="status-bar">
+                            ⚠️ Configura tu API key para empezar
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Configuración</h2>
+                <div class="form-group">
+                    <label for="api-key">OpenRouter API Key:</label>
+                    <input type="password" id="api-key" placeholder="Ingresa tu API key de OpenRouter">
+                    <small>Opcional: Si está vacío, se usará rotación automática de keys</small>
+                </div>
+                <div class="form-group">
+                    <label for="model-select">Modelo:</label>
+                    <select id="model-select">
+                        <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek Chat V3 (Free)</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button class="btn btn-secondary" id="clear-chat-btn">🗑️ Limpiar Chat</button>
+                    <button class="btn btn-primary" id="save-settings">💾 Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de Firebase (REEMPLAZA CON TUS DATOS)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhk87l2Zms8mT80__bAZA56825C7yoxQo",
+            authDomain: "fir-auth-46398.firebaseapp.com",
+            projectId: "fir-auth-46398",
+            storageBucket: "fir-auth-46398.appspot.com",
+            messagingSenderId: "413507602598",
+            appId: "1:413507602598:web:0e56b0d5df3aa4767a4c67",
+            measurementId: "G-HMW3QX4G4V"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Variables globales
+        let currentUser = null;
+        let authInitialized = false;
+
+        // Configurar proveedor de Google
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+        googleProvider.addScope('profile');
+        googleProvider.addScope('email');
+
+        // Referencias a elementos
+        const loadingContainer = document.getElementById('loading-container');
+        const authContainer = document.getElementById('auth-container');
+        const appContainer = document.getElementById('app-container');
+        const googleLoginBtn = document.getElementById('google-login-btn');
+        const anonymousBtn = document.getElementById('anonymous-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const userAvatar = document.getElementById('user-avatar');
+        const userName = document.getElementById('user-name-sidebar');
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+
+        // Referencias para términos y condiciones
+        const termsCheckbox = document.getElementById('terms-checkbox');
+        const termsLink = document.getElementById('terms-link');
+        const termsModal = document.getElementById('terms-modal');
+        const termsModalClose = document.getElementById('terms-modal-close');
+        const termsAcceptBtn = document.getElementById('terms-accept-btn');
+        const loginButtons = document.getElementById('login-buttons');
+
+        // Referencias para enlaces legales
+        const legalNoticeLink = document.getElementById('legal-notice-link');
+        const privacyPolicyLink = document.getElementById('privacy-policy-link');
+        const contactLink = document.getElementById('contact-link');
+        
+        // Referencias para contenido del modal
+        const modalTitle = document.getElementById('modal-title');
+        const modalContent = document.getElementById('modal-content');
+        const termsContent = document.getElementById('terms-content');
+        const legalNoticeContent = document.getElementById('legal-notice-content');
+        const privacyPolicyContent = document.getElementById('privacy-policy-content');
+        const contactContent = document.getElementById('contact-content');
+
+        // CLASE DEL CHATBOT VISUAL
+        class VisualEmojiChatBot {
+            constructor() {
+                this.waitForAuth();
+            }
+
+            async waitForAuth() {
+                auth.onAuthStateChanged((user) => {
+                    this.currentUser = user;
+                    this.initializeApp();
+                });
+            }
+
+            initializeApp() {
+                this.apiKey = '';
+                this.selectedModel = 'deepseek/deepseek-chat-v3-0324:free';
+                this.messages = [];
+                this.conversationStarted = false;
+                this.baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
+                
+                this.setupApiKeyRotation();
+                this.loadSettingsFromLocalStorage();
+                
+                if (this.currentUser) {
+                    this.loadSettingsFromFirebase();
+                }
+                
+                this.initializeElements();
+                this.setupEventListeners();
+                this.updateUI();
+                this.createParticles();
+            }
+
+            setupApiKeyRotation() {
+                this.rotationKeys = [
+                    this.deobfuscateKey('c2stb3ItdjEtOTE0M2YyOTM5MjJjMjIzNDYzNjk3NmJjZTA4OTljZWY2ODQwMWFiNzIyZjAyODUyZTljZjM1MmZkMDZmNDY5Mg=='),
+                    this.deobfuscateKey('c2stb3ItdjEtN2Y2OTE1NWMxYTMwNWYyMjc4ODE5YTU0MWJjNzU3MGY5MWQ3MzI4Mjk1NTBjYzNiNGEyOTk0ODk0MjdkNmQxOQ=='),
+                    this.deobfuscateKey('c2stb3ItdjEtZDIxNTZhOWM3MWRjOThkN2E4ZGIzYjVlNTFmMzVjZjk0YzFmMzQxZjg1Zjc1ODMwNTc5MWFhMWI2ODFkYTZiMQ=='),
+                    this.deobfuscateKey('c2stb3ItdjEtNjk1ZTgxMTBiODcwNmFmZTk1YTYyMWRjMjZiZGU5MGZjYjk5YWFkNDMwYWVmZGZjMTFkZDU4YzAwNTIwNjYwOA==')
+                ];
+                this.currentKeyIndex = 0;
+                this.useRotation = true;
+            }
+
+            deobfuscateKey(obfuscatedKey) {
+                try {
+                    return atob(obfuscatedKey);
+                } catch (error) {
+                    console.warn('Error desofuscando clave:', error);
+                    return '';
+                }
+            }
+
+            getActiveApiKey() {
+                if (this.apiKey && this.apiKey.trim()) {
+                    return this.apiKey.trim();
+                }
+                if (this.useRotation && this.rotationKeys.length > 0) {
+                    return this.rotationKeys[this.currentKeyIndex];
+                }
+                return '';
+            }
+
+            rotateApiKey() {
+                if (this.rotationKeys.length <= 1) return false;
+                this.currentKeyIndex = (this.currentKeyIndex + 1) % this.rotationKeys.length;
+                return true;
+            }
+
+            shouldRotateKey(error, status) {
+                const rotationErrors = [402, 429, 403];
+                return rotationErrors.includes(status) || 
+                       (error.message && (
+                           error.message.includes('quota') ||
+                           error.message.includes('rate limit') ||
+                           error.message.includes('insufficient')
+                       ));
+            }
+
+            loadSettingsFromLocalStorage() {
+                try {
+                    const savedApiKey = localStorage.getItem('chatbot_api_key');
+                    const savedModel = localStorage.getItem('chatbot_selected_model');
+                    
+                    if (savedApiKey) this.apiKey = savedApiKey;
+                    if (savedModel) this.selectedModel = savedModel;
+                } catch (error) {
+                    console.warn('Error cargando desde localStorage:', error);
+                }
+            }
+
+            async loadSettingsFromFirebase() {
+                try {
+                    if (window.loadedApiKey) {
+                        this.apiKey = window.loadedApiKey;
+                        localStorage.setItem('chatbot_api_key', this.apiKey);
+                    }
+                    
+                    if (window.loadedModel) {
+                        this.selectedModel = window.loadedModel;
+                        localStorage.setItem('chatbot_selected_model', this.selectedModel);
+                    }
+                } catch (error) {
+                    console.warn('Error cargando desde Firebase:', error);
+                }
+            }
+
+            saveSettingsToLocalStorage() {
+                try {
+                    localStorage.setItem('chatbot_api_key', this.apiKey);
+                    localStorage.setItem('chatbot_selected_model', this.selectedModel);
+                } catch (error) {
+                    console.error('Error guardando en localStorage:', error);
+                }
+            }
+
+            async saveSettingsToFirebase() {
+                try {
+                    if (this.currentUser && window.saveUserData) {
+                        await window.saveUserData(this.apiKey, this.selectedModel);
+                    }
+                } catch (error) {
+                    console.error('Error guardando en Firebase:', error);
+                }
+            }
+
+            initializeElements() {
+                this.messageInput = document.getElementById('message-input');
+                this.sendButton = document.getElementById('send-button');
+                this.messagesContainer = document.getElementById('messages-container');
+                this.configBtn = document.getElementById('config-btn');
+                this.configBtnHeader = document.getElementById('config-btn-header');
+                this.settingsModal = document.getElementById('settings-modal');
+                this.closeModal = document.querySelector('.close');
+                this.apiKeyInput = document.getElementById('api-key');
+                this.modelSelect = document.getElementById('model-select');
+                this.saveSettingsBtn = document.getElementById('save-settings');
+                this.clearChatBtn = document.getElementById('clear-chat-btn');
+                this.statusBar = document.getElementById('status-bar');
+                this.characterContainer = document.getElementById('character-container');
+                this.characterFace = document.getElementById('character-face');
+                this.emojiBubble = document.getElementById('emoji-bubble');
+            }
+
+            setupEventListeners() {
+                this.sendButton.addEventListener('click', () => this.sendMessage());
+                this.messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendMessage();
+                    }
+                });
+
+                this.configBtn.addEventListener('click', () => this.openSettingsModal());
+                this.configBtnHeader.addEventListener('click', () => this.openSettingsModal());
+
+                this.closeModal.addEventListener('click', () => {
+                    this.settingsModal.style.display = 'none';
+                });
+
+                window.addEventListener('click', (e) => {
+                    if (e.target === this.settingsModal) {
+                        this.settingsModal.style.display = 'none';
+                    }
+                });
+
+                this.saveSettingsBtn.addEventListener('click', () => this.saveSettingsAction());
+                this.clearChatBtn.addEventListener('click', () => this.clearChat());
+            }
+
+            openSettingsModal() {
+                this.settingsModal.style.display = 'block';
+                this.apiKeyInput.value = this.apiKey;
+                this.modelSelect.value = this.selectedModel;
+            }
+
+            createParticles() {
+                const particles = document.querySelector('.particles');
+                const particleEmojis = ['✨', '⭐', '💫', '🌟', '💖', '🦋', '🌸', '🎈'];
+                
+                for (let i = 0; i < 8; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.textContent = particleEmojis[Math.floor(Math.random() * particleEmojis.length)];
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.top = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 6 + 's';
+                    particles.appendChild(particle);
+                }
+            }
+
+            updateCharacterEmotion(emoji) {
+                // Actualizar la cara del personaje con el emoji
+                this.characterFace.textContent = emoji;
+                
+                // Resetear clases del contenedor
+                this.characterContainer.className = 'character-container';
+                
+                const emotionMap = {
+                    '😊': 'happy', '😄': 'happy', '🎉': 'excited', '✨': 'excited',
+                    '🤔': 'thinking', '💭': 'thinking', '🧠': 'thinking',
+                    '😕': 'confused', '🤷': 'confused', '❓': 'confused',
+                    '💫': 'excited', '🌟': 'excited', '🚀': 'excited'
+                };
+                
+                const emotion = emotionMap[emoji] || 'happy';
+                this.characterContainer.classList.add(emotion);
+                
+                // Mostrar burbuja de emoji
+                this.emojiBubble.textContent = emoji;
+                
+                setTimeout(() => {
+                    this.createSparkles();
+                }, 100);
+            }
+
+            createSparkles() {
+                const sparkleEmojis = ['✨', '⭐', '💫', '🌟'];
+                const container = this.characterContainer;
+                
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'sparkle';
+                        sparkle.textContent = sparkleEmojis[Math.floor(Math.random() * sparkleEmojis.length)];
+                        sparkle.style.left = Math.random() * 250 + 'px';
+                        sparkle.style.top = Math.random() * 300 + 'px';
+                        container.appendChild(sparkle);
+                        
+                        setTimeout(() => sparkle.remove(), 1000);
+                    }, i * 100);
+                }
+            }
+
+            displayMessage(content, role) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${role}`;
+                messageDiv.textContent = content;
+                
+                if (role === 'bot') {
+                    setTimeout(() => this.updateCharacterEmotion(content), 300);
+                }
+                
+                this.messagesContainer.appendChild(messageDiv);
+                this.scrollToBottom();
+            }
+
+            showTyping() {
+                const typingDiv = document.createElement('div');
+                typingDiv.className = 'message typing-indicator';
+                typingDiv.id = 'typing-indicator';
+                typingDiv.textContent = '🤔 Pensando...';
+                this.messagesContainer.appendChild(typingDiv);
+                this.scrollToBottom();
+                
+                this.characterContainer.className = 'character-container thinking';
+                this.characterFace.textContent = '🤔';
+            }
+
+            hideTyping() {
+                const typingDiv = document.getElementById('typing-indicator');
+                if (typingDiv) typingDiv.remove();
+            }
+
+            scrollToBottom() {
+                this.messagesContainer.scrollTop = this.messagesContainer.scrollHeight;
+            }
+
+            updateUI() {
+                const hasApiKey = !!this.getActiveApiKey();
+                this.messageInput.disabled = !hasApiKey;
+                this.sendButton.disabled = !hasApiKey;
+
+                if (hasApiKey) {
+                    this.messageInput.placeholder = 'Escribe tu mensaje aquí...';
+                    this.statusBar.textContent = `✅ Conectado - Modelo: ${this.getModelName()}`;
+                    this.statusBar.style.background = 'rgba(212, 237, 218, 0.7)';
+                    this.statusBar.style.color = '#155724';
+                    
+                    if (!this.conversationStarted && this.messages.length === 0) {
+                        this.displayWelcomeMessage();
+                    }
+                } else {
+                    this.messageInput.placeholder = 'Configura tu API key primero...';
+                    this.statusBar.textContent = '⚠️ Configura tu API key para empezar';
+                    this.statusBar.style.background = 'rgba(255, 243, 205, 0.7)';
+                    this.statusBar.style.color = '#856404';
+                }
+            }
+
+            displayWelcomeMessage() {
+                const welcomeEmoji = "👋";
+                this.displayMessage(welcomeEmoji, 'bot');
+                this.messages.push({ role: 'assistant', content: welcomeEmoji });
+                this.conversationStarted = true;
+            }
+
+            getModelName() {
+                const modelNames = {
+                    'deepseek/deepseek-chat-v3-0324:free': 'DeepSeek Chat V3'
+                };
+                return modelNames[this.selectedModel] || this.selectedModel;
+            }
+
+            async sendMessage() {
+                const message = this.messageInput.value.trim();
+                if (!message || !this.getActiveApiKey()) return;
+
+                this.messageInput.value = '';
+                this.sendButton.disabled = true;
+                this.messageInput.disabled = true;
+
+                this.displayMessage(message, 'user');
+                this.messages.push({ role: 'user', content: message });
+                this.showTyping();
+
+                try {
+                    const botMessage = await this.getEmojiResponse();
+                    this.hideTyping();
+                    this.displayMessage(botMessage, 'bot');
+                    this.messages.push({ role: 'assistant', content: botMessage });
+                } catch (error) {
+                    this.hideTyping();
+                    console.error('Error:', error);
+                    const errorEmoji = "😔";
+                    this.displayMessage(errorEmoji, 'bot');
+                    this.updateCharacterEmotion(errorEmoji);
+                } finally {
+                    this.sendButton.disabled = false;
+                    this.messageInput.disabled = false;
+                    this.messageInput.focus();
+                }
+            }
+
+            async getEmojiResponse() {
+                const systemPrompt = `Eres una IA única que SOLO puede comunicarse usando UN ÚNICO EMOJI por respuesta.
+
+REGLAS ABSOLUTAS:
+- RESPONDER SIEMPRE CON UN SOLO EMOJI
+- NUNCA usar texto, palabras, números o símbolos
+- NUNCA explicar tu elección
+- NUNCA usar múltiples emojis
+
+PERSONALIDAD A TRAVÉS DE EMOJIS:
+- Empática: 💝 🤗 😌 🫂
+- Inteligente: 🧠 💡 🎯 🔍
+- Divertida: 😄 🎉 😜 🎭
+- Comprensiva: 😊 💚 🫂 🤲
+
+CONTEXTO EMOCIONAL:
+- Tristeza/problemas: 💙 🫂 🌟 💚
+- Alegría/éxito: 🎉 ✨ 😊 💫
+- Confusión/preguntas: 🤔 💭 🔍
+- Amor/cariño: 💝 🌸 💖 💕
+- Sorpresa: 😱 🤯 ✨ 🎭
+- Apoyo/ánimo: 💪 🌟 👏 🚀
+
+SITUACIONES ESPECÍFICAS:
+- Preguntas SÍ/NO: 👍 👎 ✅ ❌
+- Curiosidad: 🤔 💭 🔍 🎯
+- Tecnología: 🧠 💡 ⚙️ 🔧
+- Creatividad: 🎨 ✨ 💫 🌈
+- Aprendizaje: 📚 🎓 💡 🧠`;
+
+                const apiMessages = [
+                    { role: 'system', content: systemPrompt },
+                    ...this.messages.slice(-10)
+                ];
+
+                const requestBody = {
+                    model: this.selectedModel,
+                    messages: apiMessages,
+                    temperature: 0.8,
+                    max_tokens: 5,
+                    top_p: 0.9,
+                    frequency_penalty: 0.3,
+                    presence_penalty: 0.2,
+                    stream: false,
+                    stop: ["\n", " ", ".", ",", ":", ";", "!", "?", "-", "_"]
+                };
+
+                for (let attempt = 1; attempt <= 5; attempt++) {
+                    try {
+                        const result = await this.makeApiCallWithRotation(requestBody);
+                        if (result.success && result.data.choices && result.data.choices[0]) {
+                            let botMessage = result.data.choices[0].message.content.trim();
+                            botMessage = this.extractEmoji(botMessage);
+                            
+                            if (this.isValidEmoji(botMessage)) {
+                                return botMessage;
+                            }
+                        }
+                        throw new Error('Respuesta inválida');
+                    } catch (error) {
+                        if (attempt === 5) throw error;
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+                }
+                
+                return this.getFallbackEmoji();
+            }
+
+            async makeApiCallWithRotation(requestBody, maxRetries = null) {
+                const activeKey = this.getActiveApiKey();
+                if (!activeKey || (!this.useRotation || this.rotationKeys.length === 0)) {
+                    return this.makeTraditionalApiCall(requestBody, activeKey);
+                }
+
+                const totalKeys = this.rotationKeys.length;
+                const retryLimit = maxRetries || totalKeys;
+                let lastError = null;
+
+                for (let attempt = 0; attempt < retryLimit; attempt++) {
+                    const currentKey = this.getActiveApiKey();
+                    
+                    try {
+                        const response = await fetch(this.baseUrl, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${currentKey}`,
+                                'Content-Type': 'application/json',
+                                'HTTP-Referer': window.location.origin,
+                                'X-Title': 'ChatBot AI'
+                            },
+                            body: JSON.stringify(requestBody)
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            return { success: true, data };
+                        }
+
+                        const errorData = await response.json();
+                        const error = new Error(`Error ${response.status}: ${errorData.error?.message || 'Error desconocido'}`);
+                        
+                        if (this.shouldRotateKey(error, response.status) && this.rotateApiKey()) {
+                            lastError = error;
+                            continue;
+                        } else {
+                            throw error;
+                        }
+
+                    } catch (fetchError) {
+                        lastError = fetchError;
+                        
+                        if (fetchError instanceof TypeError) {
+                            throw fetchError;
+                        }
+                        
+                        if (this.rotateApiKey()) {
+                            continue;
+                        } else {
+                            throw fetchError;
+                        }
+                    }
+                }
+
+                throw new Error(`Todas las API keys agotadas. Último error: ${lastError?.message || 'Error desconocido'}`);
+            }
+
+            async makeTraditionalApiCall(requestBody, apiKey) {
+                const response = await fetch(this.baseUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json',
+                        'HTTP-Referer': window.location.origin,
+                        'X-Title': 'ChatBot AI'
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Error ${response.status}: ${errorData.error?.message || 'Error desconocido'}`);
+                }
+
+                const data = await response.json();
+                return { success: true, data };
+            }
+
+            extractEmoji(text) {
+                const cleaned = text.replace(/["'`\n\r\t\s]/g, '');
+                const emojiRegex = /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u;
+                const match = cleaned.match(emojiRegex);
+                return match ? match[0] : null;
+            }
+
+            isValidEmoji(text) {
+                if (!text || text.length === 0 || text.length > 2) return false;
+                const codePoint = text.codePointAt(0);
+                const emojiRanges = [
+                    [0x1F300, 0x1F9FF], [0x2600, 0x26FF], [0x2700, 0x27BF],
+                    [0x1F600, 0x1F64F], [0x1F680, 0x1F6FF], [0x1F900, 0x1F9FF]
+                ];
+                return emojiRanges.some(([start, end]) => codePoint >= start && codePoint <= end);
+            }
+
+            getFallbackEmoji() {
+                const fallbacks = ['😊', '🤔', '👍', '💫', '🌟', '💚', '✨', '🎯'];
+                return fallbacks[Math.floor(Math.random() * fallbacks.length)];
+            }
+
+            async saveSettingsAction() {
+                const newApiKey = this.apiKeyInput.value.trim();
+                const newModel = this.modelSelect.value;
+                
+                this.apiKey = newApiKey;
+                this.selectedModel = newModel;
+
+                this.saveSettingsToLocalStorage();
+                
+                if (this.currentUser) {
+                    await this.saveSettingsToFirebase();
+                }
+
+                this.settingsModal.style.display = 'none';
+                this.updateUI();
+            }
+
+            clearChat() {
+                this.messages = [];
+                this.conversationStarted = false;
+                this.messagesContainer.innerHTML = '';
+                this.emojiBubble.classList.remove('show');
+                this.characterContainer.className = 'character-container';
+                this.characterFace.textContent = '😊';
+                
+                if (this.getActiveApiKey()) {
+                    this.displayWelcomeMessage();
+                }
+                
+                this.settingsModal.style.display = 'none';
+            }
+        }
+
+        // FUNCIONES DE AUTENTICACIÓN Y TEMA (del archivo original)
+        function showLoading() {
+            loadingContainer.style.display = 'flex';
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'none';
+        }
+
+        function showApp() {
+            loadingContainer.style.display = 'none';
+            authContainer.style.display = 'none';
+            appContainer.style.display = 'flex';
+            
+            if (currentUser && !currentUser.isAnonymous) {
+                userAvatar.src = currentUser.photoURL || 'https://via.placeholder.com/40';
+                userName.textContent = currentUser.displayName || 'Usuario';
+            } else {
+                userAvatar.src = 'https://via.placeholder.com/40';
+                userName.textContent = 'serenly';
+            }
+        }
+
+        function showAuth() {
+            loadingContainer.style.display = 'none';
+            authContainer.style.display = 'flex';
+            appContainer.style.display = 'none';
+            
+            resetAuthButtons();
+            resetTermsState();
+        }
+
+        function resetAuthButtons() {
+            googleLoginBtn.disabled = false;
+            googleLoginBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Continuar con Google
+            `;
+            anonymousBtn.disabled = false;
+            anonymousBtn.innerHTML = 'Continuar como invitado';
+        }
+
+        function resetTermsState() {
+            termsCheckbox.checked = false;
+            loginButtons.classList.remove('enabled');
+        }
+
+        function showModalContent(type) {
+            termsContent.style.display = 'none';
+            legalNoticeContent.style.display = 'none';
+            privacyPolicyContent.style.display = 'none';
+            contactContent.style.display = 'none';
+            
+            switch(type) {
+                case 'terms':
+                    modalTitle.textContent = 'Términos y Condiciones de Uso';
+                    termsContent.style.display = 'block';
+                    break;
+                case 'legal':
+                    modalTitle.textContent = 'Aviso Legal';
+                    legalNoticeContent.style.display = 'block';
+                    break;
+                case 'privacy':
+                    modalTitle.textContent = 'Política de Privacidad';
+                    privacyPolicyContent.style.display = 'block';
+                    break;
+                case 'contact':
+                    modalTitle.textContent = 'Contacto';
+                    contactContent.style.display = 'block';
+                    break;
+            }
+            
+            termsModal.style.display = 'block';
+        }
+
+        function validateTermsAndLogin(loginFunction) {
+            if (!termsCheckbox.checked) {
+                alert('Debes aceptar los términos y condiciones para continuar');
+                return;
+            }
+            loginFunction();
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('chatbot_theme') || 'light';
+            
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            updateThemeToggleIcon(savedTheme);
+        }
+
+        function toggleTheme() {
+            const isDarkMode = document.body.classList.contains('dark-theme');
+            const newTheme = isDarkMode ? 'light' : 'dark';
+            
+            if (newTheme === 'dark') {
+                document.body.classList.add('dark-theme');
+            } else {
+                document.body.classList.remove('dark-theme');
+            }
+            
+            localStorage.setItem('chatbot_theme', newTheme);
+            updateThemeToggleIcon(newTheme);
+            showThemeChangeNotification(newTheme);
+        }
+
+        function updateThemeToggleIcon(theme) {
+            if (theme === 'dark') {
+                themeToggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6zm0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0zm0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13zm8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5zM3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8zm10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0zm-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0zm9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707zM4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708z"/>
+                    </svg>
+                `;
+                themeToggleBtn.title = 'Cambiar a tema claro';
+            } else {
+                themeToggleBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M6 .278a.768.768 0 0 1 .08.858 7.208 7.208 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277.527 0 1.04-.055 1.533-.16a.787.787 0 0 1 .81.316.733.733 0 0 1-.031.893A8.349 8.349 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.752.752 0 0 1 6 .278z"/>
+                    </svg>
+                `;
+                themeToggleBtn.title = 'Cambiar a tema oscuro';
+            }
+        }
+
+        function showThemeChangeNotification(newTheme) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${newTheme === 'dark' ? '#2d3748' : '#ffffff'};
+                color: ${newTheme === 'dark' ? '#e2e8f0' : '#2d3748'};
+                border: 1px solid ${newTheme === 'dark' ? '#4a5568' : '#e2e8f0'};
+                padding: 12px 16px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: translateX(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            `;
+            
+            const themeName = newTheme === 'dark' ? 'oscuro' : 'claro';
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    ${newTheme === 'dark' ? '🌙' : '☀️'}
+                    <span>Tema ${themeName} activado</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 2000);
+        }
+
+        function detectSystemTheme() {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark';
+            }
+            return 'light';
+        }
+
+        function applySystemTheme() {
+            const systemTheme = detectSystemTheme();
+            const savedTheme = localStorage.getItem('chatbot_theme');
+            
+            if (!savedTheme) {
+                localStorage.setItem('chatbot_theme', systemTheme);
+                if (systemTheme === 'dark') {
+                    document.body.classList.add('dark-theme');
+                }
+                updateThemeToggleIcon(systemTheme);
+            }
+        }
+
+        function setupSystemThemeListener() {
+            if (window.matchMedia) {
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                mediaQuery.addListener((e) => {
+                    const savedTheme = localStorage.getItem('chatbot_theme');
+                    if (!savedTheme) {
+                        const newTheme = e.matches ? 'dark' : 'light';
+                        if (newTheme === 'dark') {
+                            document.body.classList.add('dark-theme');
+                        } else {
+                            document.body.classList.remove('dark-theme');
+                        }
+                        updateThemeToggleIcon(newTheme);
+                    }
+                });
+            }
+        }
+
+        // Funciones de autenticación
+        async function signInWithGoogle() {
+            try {
+                googleLoginBtn.disabled = true;
+                googleLoginBtn.innerHTML = 'Conectando...';
+                
+                const result = await auth.signInWithPopup(googleProvider);
+                console.log('Login exitoso:', result.user);
+            } catch (error) {
+                console.error('Error en login:', error);
+                alert('Error al iniciar sesión: ' + error.message);
+                resetAuthButtons();
+            }
+        }
+
+        async function signInAnonymously() {
+            try {
+                anonymousBtn.disabled = true;
+                anonymousBtn.innerHTML = 'Conectando...';
+                
+                const result = await auth.signInAnonymously();
+                console.log('Login anónimo exitoso:', result.user);
+            } catch (error) {
+                console.error('Error en login anónimo:', error);
+                alert('Error al iniciar sesión: ' + error.message);
+                resetAuthButtons();
+            }
+        }
+
+        async function logout() {
+            try {
+                showLoading();
+                
+                await auth.signOut();
+                
+                if (window.gapi && window.gapi.auth2) {
+                    const authInstance = window.gapi.auth2.getAuthInstance();
+                    if (authInstance) {
+                        await authInstance.signOut();
+                        await authInstance.disconnect();
+                    }
+                }
+                
+                console.log('Logout exitoso');
+            } catch (error) {
+                console.error('Error en logout:', error);
+                window.location.reload();
+            }
+        }
+
+        // Observador de estado de autenticación
+        auth.onAuthStateChanged(async (user) => {
+            console.log('🔐 Auth state changed:', user ? 'User logged in' : 'No user');
+            
+            if (user) {
+                currentUser = user;
+                await loadUserData();
+                showApp();
+            } else {
+                currentUser = null;
+                if (authInitialized) {
+                    showAuth();
+                }
+            }
+            
+            if (!authInitialized) {
+                authInitialized = true;
+                if (!user) {
+                    showAuth();
+                }
+            }
+        });
+
+        // Funciones de base de datos
+        async function loadUserData() {
+            if (!currentUser || currentUser.isAnonymous) return;
+            
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.apiKey) {
+                        document.getElementById('api-key').value = data.apiKey;
+                        window.loadedApiKey = data.apiKey;
+                    }
+                    if (data.selectedModel) {
+                        document.getElementById('model-select').value = data.selectedModel;
+                        window.loadedModel = data.selectedModel;
+                    }
+                }
+            } catch (error) {
+                console.error('Error cargando datos del usuario:', error);
+            }
+        }
+
+        async function saveUserData(apiKey, selectedModel) {
+            if (!currentUser || currentUser.isAnonymous) return;
+            
+            try {
+                await db.collection('users').doc(currentUser.uid).set({
+                    apiKey: apiKey,
+                    selectedModel: selectedModel,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+                console.log('Datos guardados en Firebase');
+            } catch (error) {
+                console.error('Error guardando datos:', error);
+            }
+        }
+
+        // Event Listeners
+        function setupEventListeners() {
+            googleLoginBtn.addEventListener('click', () => validateTermsAndLogin(signInWithGoogle));
+            anonymousBtn.addEventListener('click', () => validateTermsAndLogin(signInAnonymously));
+            logoutBtn.addEventListener('click', logout);
+            themeToggleBtn.addEventListener('click', toggleTheme);
+
+            termsCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    loginButtons.classList.add('enabled');
+                } else {
+                    loginButtons.classList.remove('enabled');
+                }
+            });
+
+            termsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                showModalContent('terms');
+            });
+
+            legalNoticeLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                showModalContent('legal');
+            });
+
+            privacyPolicyLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                showModalContent('privacy');
+            });
+
+            contactLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                showModalContent('contact');
+            });
+
+            termsModalClose.addEventListener('click', function() {
+                termsModal.style.display = 'none';
+            });
+
+            termsAcceptBtn.addEventListener('click', function() {
+                if (termsContent.style.display === 'block') {
+                    termsCheckbox.checked = true;
+                    loginButtons.classList.add('enabled');
+                }
+                termsModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(e) {
+                if (e.target === termsModal) {
+                    termsModal.style.display = 'none';
+                }
+            });
+        }
+
+        // Hacer funciones disponibles globalmente
+        window.saveUserData = saveUserData;
+        window.getCurrentUser = () => currentUser;
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM loaded, showing loading screen...');
+            showLoading();
+            applySystemTheme();
+            initializeTheme();
+            setupSystemThemeListener();
+            setupEventListeners();
+            
+            // Timeout de seguridad
+            setTimeout(() => {
+                if (!authInitialized) {
+                    console.warn('⚠️ Firebase tardando mucho, mostrando auth...');
+                    authInitialized = true;
+                    showAuth();
+                }
+            }, 5000);
+        });
+
+        // Inicializar chatbot cuando la app esté lista
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.getElementById('app-container').style.display !== 'none') {
+                window.chatBot = new VisualEmojiChatBot();
+            } else {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                            const appContainer = document.getElementById('app-container');
+                            if (appContainer.style.display !== 'none') {
+                                window.chatBot = new VisualEmojiChatBot();
+                                observer.disconnect();
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(document.getElementById('app-container'), {
+                    attributes: true,
+                    attributeFilter: ['style']
+                });
+            }
+        });
+    </script>
+</body>
+</html>
