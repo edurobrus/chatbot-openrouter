@@ -3,273 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gdansk - Guía de 12 y 13 de Agosto 2025</title>
+    <title>Guía de 2 Días en Gdansk - Agosto 2025</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Georgia', serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: #2c3e50;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            margin-top: 20px;
-            margin-bottom: 20px;
         }
-        
+
         .header {
-            background: linear-gradient(45deg, #c0392b, #e74c3c);
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
             color: white;
-            padding: 40px;
             text-align: center;
+            padding: 40px 20px;
             position: relative;
             overflow: hidden;
         }
-        
+
         .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(-50px) translateY(-50px); }
+            100% { transform: translateX(50px) translateY(50px); }
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            position: relative;
+            z-index: 2;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .day-section {
+            margin-bottom: 50px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .day-section:hover {
+            transform: translateY(-5px);
+        }
+
+        .day-header {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 25px;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .day-content {
+            padding: 30px;
+        }
+
+        .location {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
+            border: 2px solid #e0e8ff;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .location::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Gdansk_Dlugi_Targ.jpg/1200px-Gdansk_Dlugi_Targ.jpg') center/cover;
-            opacity: 0.3;
-            z-index: -1;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
         }
-        
-        .header h1 {
-            font-size: 3rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
+
+        .location:hover {
+            transform: translateX(5px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
-        
-        .header p {
-            font-size: 1.3rem;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
-        
-        .content {
-            padding: 40px;
+
+        .location-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
         }
-        
-        .day-section {
-            margin-bottom: 50px;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+
+        .time-badge {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
         }
-        
-        .day-title {
-            color: #e74c3c;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            text-align: center;
-            position: relative;
+
+        .location-description {
+            color: #4a5568;
+            margin-bottom: 15px;
+            line-height: 1.7;
         }
-        
-        .day-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 3px;
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
-            border-radius: 2px;
-        }
-        
-        .time-section {
-            margin-bottom: 30px;
-            padding: 25px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 10px;
-            border-left: 5px solid #e74c3c;
+
+        .map-link {
+            display: inline-flex;
+            align-items: center;
+            background: linear-gradient(45deg, #48bb78, #38a169);
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: bold;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
         }
-        
-        .time-section:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+
+        .map-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
+            background: linear-gradient(45deg, #38a169, #2f855a);
         }
-        
-        .time {
-            color: #e74c3c;
+
+        .map-link::before {
+            content: '📍';
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        .tips-section {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%);
+            border: 2px solid #ffd199;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .tips-title {
             font-size: 1.3rem;
             font-weight: bold;
-            margin-bottom: 10px;
+            color: #d69e2e;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
         }
-        
-        .time::before {
-            content: '🕒';
+
+        .tips-title::before {
+            content: '💡';
             margin-right: 10px;
-        }
-        
-        .place {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
-        
-        .place-image {
-            width: 150px;
-            height: 120px;
-            border-radius: 10px;
-            margin-right: 20px;
-            object-fit: cover;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease;
-        }
-        
-        .place-image:hover {
-            transform: scale(1.05);
-        }
-        
-        .place-info h3 {
-            color: #2c3e50;
             font-size: 1.5rem;
-            margin-bottom: 10px;
         }
-        
-        .place-info p {
-            color: #555;
-            margin-bottom: 10px;
+
+        .tips-list {
+            color: #744210;
+            line-height: 1.8;
         }
-        
-        .highlights {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin: 30px 0;
-        }
-        
-        .highlights h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .highlight-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .highlight-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .highlight-item h3 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-        }
-        
-        .bars-section {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            margin: 30px 0;
-        }
-        
-        .bars-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        
-        .bar-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-        }
-        
-        .bar-item h3 {
-            color: #f39c12;
-            margin-bottom: 10px;
-        }
-        
+
         .weather-info {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .tips {
-            background: #f8f9fa;
-            border: 2px dashed #e74c3c;
+            background: linear-gradient(135deg, #e6fffa 0%, #b3f5e6 100%);
+            border: 2px solid #81e6d9;
+            border-radius: 15px;
             padding: 25px;
-            border-radius: 10px;
-            margin-top: 30px;
+            margin-bottom: 30px;
+            text-align: center;
         }
-        
-        .tips h3 {
-            color: #e74c3c;
-            margin-bottom: 15px;
+
+        .weather-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c7a7b;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .weather-title::before {
+            content: '🌞';
+            margin-right: 10px;
             font-size: 1.5rem;
         }
-        
-        .tips ul {
-            padding-left: 20px;
-        }
-        
-        .tips li {
-            margin-bottom: 8px;
-            color: #555;
-        }
-        
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
             }
             
-            .day-title {
-                font-size: 2rem;
-            }
-            
-            .place {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .place-image {
-                width: 100%;
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-            
             .content {
+                padding: 20px;
+            }
+            
+            .location-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .day-header {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 30px 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .day-content {
+                padding: 20px;
+            }
+            
+            .location {
                 padding: 20px;
             }
         }
@@ -277,212 +280,213 @@
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1>🏰 Gdansk</h1>
-            <p>Tu guía completa para el 12 y 13 de Agosto 2025</p>
-        </header>
-        
+        <div class="header">
+            <h1>🏰 Guía de Gdansk</h1>
+            <p>Tu aventura perfecta de 2 días en la Perla del Báltico</p>
+        </div>
+
         <div class="content">
             <div class="weather-info">
-                <h3>🌤️ Clima esperado para Agosto</h3>
-                <p>Temperatura: 18-24°C | Posibles lluvias ligeras | Lleva una chaqueta ligera</p>
+                <div class="weather-title">Tiempo en Agosto</div>
+                <p style="color: #2c7a7b;">Temperaturas: 15-22°C | Lluvias ocasionales | Días largos con hasta 16 horas de luz</p>
             </div>
-            
-            <!-- DÍA 1: 12 DE AGOSTO -->
+
             <div class="day-section">
-                <h2 class="day-title">Lunes 12 de Agosto - Casco Histórico</h2>
-                
-                <div class="time-section">
-                    <div class="time">09:00 - 10:30</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Gdansk_Dlugi_Targ.jpg/640px-Gdansk_Dlugi_Targ.jpg" alt="Casco histórico de Gdansk" class="place-image">
-                        <div class="place-info">
-                            <h3>🏛️ Plaza del Mercado Principal (Główny Rynek)</h3>
-                            <p>Comienza tu día en el corazón del casco histórico. Admira la arquitectura gótica y renacentista de las casas coloridas.</p>
-                            <p><strong>Imprescindible:</strong> Ayuntamiento Principal y la Fuente de Neptuno</p>
+                <div class="day-header">DÍA 1 - Centro Histórico y Ciudad Principal</div>
+                <div class="day-content">
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Puerta Dorada (Złota Brama)</div>
+                            </div>
+                            <div class="time-badge">9:00 - 9:30</div>
                         </div>
+                        <div class="location-description">
+                            Comienza tu día en esta icónica puerta renacentista de 1612, entrada principal a la Ciudad Antigua. Es el punto de partida perfecto para explorar la Ruta Real.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Złota+Brama,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">10:30 - 12:00</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Gdansk_Basilica_of_St._Mary.jpg/640px-Gdansk_Basilica_of_St._Mary.jpg" alt="Basílica de Santa María" class="place-image">
-                        <div class="place-info">
-                            <h3>⛪ Basílica de Santa María (Bazylika Mariacka)</h3>
-                            <p>Una de las iglesias de ladrillo más grandes del mundo. Sube los 400 escalones de la torre para vistas panorámicas.</p>
-                            <p><strong>Entrada:</strong> 10 PLN | <strong>Torre:</strong> 5 PLN adicionales</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Calle Długa (Calle Larga)</div>
+                            </div>
+                            <div class="time-badge">9:30 - 10:30</div>
                         </div>
+                        <div class="location-description">
+                            Pasea por la calle más famosa de Gdansk, llena de casas burguesas coloridas y arquitectura gótica. Perfecta para fotos y compras de souvenirs.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Długa+Street,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">12:00 - 13:30</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Gdansk_Dluga_street.jpg/640px-Gdansk_Dluga_street.jpg" alt="Calle Długa" class="place-image">
-                        <div class="place-info">
-                            <h3>🚶‍♀️ Calle Długa y Długi Targ</h3>
-                            <p>Pasea por la "Vía Real" histórica. Perfecta para fotos y compras de ámbar, especialidad local.</p>
-                            <p><strong>Tip:</strong> Busca las tiendas de ámbar auténtico y artesanías locales</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Ayuntamiento de la Ciudad Principal</div>
+                            </div>
+                            <div class="time-badge">10:30 - 12:00</div>
                         </div>
+                        <div class="location-description">
+                            Visita este magnífico edificio gótico-renacentista con su impresionante torre de 81 metros. El museo interior alberga arte y artefactos históricos.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Ratusz+Głównego+Miasta,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">13:30 - 15:00</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Polish_cuisine_-_pierogi.jpg/640px-Polish_cuisine_-_pierogi.jpg" alt="Restaurante tradicional polaco" class="place-image">
-                        <div class="place-info">
-                            <h3>🍽️ Almuerzo - Restaurante Goldwasser</h3>
-                            <p>Restaurante histórico famoso por sus licores dorados y comida polaca tradicional.</p>
-                            <p><strong>Platos recomendados:</strong> Pierogi, Kotlet Schabowy, Zurek</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Fuente de Neptuno</div>
+                            </div>
+                            <div class="time-badge">12:00 - 12:30</div>
                         </div>
+                        <div class="location-description">
+                            El símbolo más famoso de Gdansk, esta fuente barroca de 1633 representa al dios del mar. Según la leyenda, aquí nació el famoso licor Goldwasser.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Fontanna+Neptuna,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">15:00 - 17:00</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Gdansk_Golden_Gate.jpg/640px-Gdansk_Golden_Gate.jpg" alt="Puerta Dorada Gdansk" class="place-image">
-                        <div class="place-info">
-                            <h3>🚪 Puerta Dorada y Murallas de la Ciudad</h3>
-                            <p>Explora las fortificaciones medievales y aprende sobre la historia defensiva de la ciudad.</p>
-                            <p><strong>Foto spot:</strong> La Puerta Dorada es icónica para fotografías</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Mercado Largo (Długi Targ)</div>
+                            </div>
+                            <div class="time-badge">12:30 - 13:30</div>
                         </div>
+                        <div class="location-description">
+                            La plaza principal con las casas más hermosas de la ciudad. Disfruta de un almuerzo en una de las terrazas mientras admiras la arquitectura hanseática.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Długi+Targ,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">17:00 - 18:30</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Gdansk_Motlawa_River.jpg/640px-Gdansk_Motlawa_River.jpg" alt="Río Motława Gdansk" class="place-image">
-                        <div class="place-info">
-                            <h3>🛥️ Paseo por el Río Motława</h3>
-                            <p>Relajante paseo junto al río con vistas de la grúa medieval y casas históricas.</p>
-                            <p><strong>Actividad:</strong> Considera un mini-crucero por el río (30 PLN)</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Puerta Verde (Zielona Brama)</div>
+                            </div>
+                            <div class="time-badge">14:00 - 14:30</div>
                         </div>
+                        <div class="location-description">
+                            Esta puerta manierista del siglo XVI conecta el Mercado Largo con el río Motława. Hoy alberga exposiciones y es sede del Museo Nacional de Gdansk.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Zielona+Brama,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
+                    </div>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Muelle Motława y Grúa Medieval</div>
+                            </div>
+                            <div class="time-badge">14:30 - 16:00</div>
+                        </div>
+                        <div class="location-description">
+                            Pasea por el histórico muelle y visita la grúa medieval más grande de Europa. Desde aquí tienes vistas espectaculares del río y la ciudad.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Żuraw,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
+                    </div>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Basílica de Santa María</div>
+                            </div>
+                            <div class="time-badge">16:30 - 18:00</div>
+                        </div>
+                        <div class="location-description">
+                            Una de las iglesias de ladrillo más grandes del mundo. Sube sus 400 escalones hasta la torre para disfrutar de vistas panorámicas de Gdansk.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Bazylika+Mariacka,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
+                    </div>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Calle Mariacka (Cena)</div>
+                            </div>
+                            <div class="time-badge">19:00 - 21:00</div>
+                        </div>
+                        <div class="location-description">
+                            Termina el día cenando en esta pintoresca calle adoquinada llena de joyerías de ámbar y restaurantes tradicionales. Prueba el pescado fresco del Báltico.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Ulica+Mariacka,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
                 </div>
             </div>
-            
-            <!-- DÍA 2: 13 DE AGOSTO -->
+
             <div class="day-section">
-                <h2 class="day-title">Martes 13 de Agosto - Cultura y Costa</h2>
-                
-                <div class="time-section">
-                    <div class="time">09:00 - 11:30</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/European_Solidarity_Centre.jpg/640px-European_Solidarity_Centre.jpg" alt="Centro Europeo de Solidaridad" class="place-image">
-                        <div class="place-info">
-                            <h3>✊ Centro Europeo de Solidaridad</h3>
-                            <p>Museo interactivo sobre el movimiento Solidaridad y la caída del comunismo.</p>
-                            <p><strong>Entrada:</strong> 23 PLN | <strong>Duración:</strong> 2-3 horas</p>
+                <div class="day-header">DÍA 2 - Astilleros, Museo y Costa</div>
+                <div class="day-content">
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Centro Europeo Solidarność</div>
+                            </div>
+                            <div class="time-badge">9:00 - 11:30</div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">11:30 - 13:00</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Gdansk_Shipyard_Monument.jpg/640px-Gdansk_Shipyard_Monument.jpg" alt="Astilleros Gdansk" class="place-image">
-                        <div class="place-info">
-                            <h3>⚓ Astilleros de Gdansk</h3>
-                            <p>Sitio histórico donde nació el movimiento Solidaridad. Área con gran significado histórico.</p>
-                            <p><strong>Monumento:</strong> Memorial a los Trabajadores Caídos</p>
+                        <div class="location-description">
+                            Museo interactivo dedicado al movimiento Solidaridad y la historia del siglo XX en Europa. Ubicado en los históricos Astilleros de Gdansk.
                         </div>
+                        <a href="https://maps.google.com/maps?q=Europejskie+Centrum+Solidarności,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">13:00 - 14:30</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Modern_restaurant_interior.jpg/640px-Modern_restaurant_interior.jpg" alt="Restaurante moderno" class="place-image">
-                        <div class="place-info">
-                            <h3>🍴 Almuerzo - Metamorfoza</h3>
-                            <p>Restaurante moderno con fusión polaca-internacional y excelentes vistas al río.</p>
-                            <p><strong>Especialidad:</strong> Cocina contemporánea con ingredientes locales</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Monumento a los Caídos del Astillero</div>
+                            </div>
+                            <div class="time-badge">11:30 - 12:00</div>
                         </div>
-                    </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">15:00 - 17:00</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Sopot_Pier_Baltic_Sea.jpg/640px-Sopot_Pier_Baltic_Sea.jpg" alt="Playa Sopot" class="place-image">
-                        <div class="place-info">
-                            <h3>🏖️ Sopot - Molo y Playa</h3>
-                            <p>A 30 min en tren. El muelle de madera más largo de Europa (511m) y playa del Báltico.</p>
-                            <p><strong>Transporte:</strong> SKM (tren rápido) - 4.50 PLN</p>
+                        <div class="location-description">
+                            Memorial de 42 metros dedicado a los trabajadores que murieron en 1970. Un lugar histórico importante para entender la Polonia moderna.
                         </div>
+                        <a href="https://maps.google.com/maps?q=Pomnik+Poległych+Stoczniowców,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-                
-                <div class="time-section">
-                    <div class="time">17:00 - 18:30</div>
-                    <div class="place">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Sopot_Monte_Cassino_Street.jpg/640px-Sopot_Monte_Cassino_Street.jpg" alt="Calle Monte Cassino Sopot" class="place-image">
-                        <div class="place-info">
-                            <h3>🛍️ Calle Monte Cassino (Sopot)</h3>
-                            <p>Calle peatonal llena de cafés, restaurantes y tiendas. Ambiente veraniego único.</p>
-                            <p><strong>Actividad:</strong> Perfecto para un café y people-watching</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Museo del Ámbar</div>
+                            </div>
+                            <div class="time-badge">13:00 - 14:30</div>
                         </div>
+                        <div class="location-description">
+                            Ubicado en la Torre de la Prisión, descubre la fascinante historia del "oro báltico". Gdansk es el centro mundial del comercio de ámbar.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Muzeum+Bursztynu,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                </div>
-            </div>
-            
-            <!-- SECCIÓN DE HIGHLIGHTS -->
-            <div class="highlights">
-                <h2>🌟 Lugares Emblemáticos Imprescindibles</h2>
-                <div class="highlight-grid">
-                    <div class="highlight-item">
-                        <h3>🏗️ Grúa Medieval</h3>
-                        <p>Símbolo de Gdansk. La grúa portuaria medieval más grande de Europa, ahora parte del Museo Marítimo.</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Fortaleza de Wisłoujście</div>
+                            </div>
+                            <div class="time-badge">15:00 - 16:30</div>
+                        </div>
+                        <div class="location-description">
+                            Fortaleza histórica en la desembocadura del río Vístula. Perfecta para un paseo relajante con vistas al mar Báltico.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Twierdza+Wisłoujście,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                    <div class="highlight-item">
-                        <h3>🏰 Artus Court</h3>
-                        <p>Palacio renacentista que era punto de encuentro de mercaderes. Interior espectacular con azulejos históricos.</p>
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Playa de Brzeźno</div>
+                            </div>
+                            <div class="time-badge">17:00 - 19:00</div>
+                        </div>
+                        <div class="location-description">
+                            Relájate en esta amplia playa de arena con su famoso muelle de madera. En agosto, perfecta para un paseo al atardecer o incluso un baño.
+                        </div>
+                        <a href="https://maps.google.com/maps?q=Plaża+Brzeźno,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
-                    <div class="highlight-item">
-                        <h3>⛪ Iglesia de San Nicolás</h3>
-                        <p>Iglesia más antigua de Gdansk, ejemplar de arquitectura gótica báltica.</p>
-                    </div>
-                    <div class="highlight-item">
-                        <h3>🎭 Teatro Shakespeare</h3>
-                        <p>Teatro moderno con diseño único inspirado en el Globe Theatre londinense.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- SECCIÓN DE BARES Y RESTAURANTES -->
-            <div class="bars-section">
-                <h2>🍻 Mejores Bares y Lugares Nocturnos</h2>
-                <div class="bars-grid">
-                    <div class="bar-item">
-                        <h3>🍸 Flisak 76</h3>
-                        <p>Bar subterráneo en sótano abovedado. Famoso por cócteles excepcionales y ambiente íntimo.</p>
-                        <p><small>📍 Calle Piwna</small></p>
-                    </div>
-                    <div class="bar-item">
-                        <h3>🍺 Irish Pub Piwnica</h3>
-                        <p>En el sótano del ayuntamiento histórico. Cerveza barata, música en vivo y karaoke.</p>
-                        <p><small>📍 Casco histórico</small></p>
-                    </div>
-                    <div class="bar-item">
-                        <h3>🌮 El Mariachi Tequila Bar</h3>
-                        <p>Bar mexicano con ambiente festivo, cócteles de tequila y pista de baile.</p>
-                        <p><small>📍 Centro de Gdansk</small></p>
-                    </div>
-                    <div class="bar-item">
-                        <h3>🍷 The Mars Lounge Bar</h3>
-                        <p>Bar moderno con ambiente sofisticado y excelente carta de vinos.</p>
-                        <p><small>📍 Zona moderna</small></p>
-                    </div>
-                    <div class="bar-item">
-                        <h3>🥃 Bar Goldwasser</h3>
-                        <p>Bar histórico famoso por su licor dorado con copos de oro de 22k. Experiencia única.</p>
-                        <p><small>📍 Calle Długa</small></p>
-                    </div>
-                    <div class="bar-item">
-                        <h3>☕ Bar Leon</h3>
-                        <p>Perfecto para desayunos y ambiente relajado durante el día.</p>
-                        <p><small>📍 Centro histórico</
+
+                    <div class="location">
+                        <div class="location-header">
+                            <div>
+                                <div class="location-title">Westerplatte</div>
+                            </div>
+                            <div class="time-badge">19:30 - 20:30</div>
+                        </div>
+                        <div class="location-description">
+                            Lugar donde comenzó la Segunda Guer
