@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guía de Días en Gdansk - Agosto 2025</title>
+    <title>Gestor de Facturas Invopop - Verifactu</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,6 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -22,258 +21,294 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.95);
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
             color: white;
+            padding: 30px;
             text-align: center;
-            padding: 40px 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>') repeat;
-            animation: float 20s infinite linear;
-        }
-
-        @keyframes float {
-            0% { transform: translateX(-50px) translateY(-50px); }
-            100% { transform: translateX(50px) translateY(50px); }
         }
 
         .header h1 {
-            font-size: 3rem;
+            font-size: 2.5em;
             margin-bottom: 10px;
-            position: relative;
-            z-index: 2;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
         .header p {
-            font-size: 1.2rem;
-            position: relative;
-            z-index: 2;
+            font-size: 1.2em;
             opacity: 0.9;
         }
 
-        .content {
+        .main-content {
             padding: 40px;
         }
 
-        .day-section {
-            margin-bottom: 50px;
-            background: white;
+        .config-section {
+            background: #f8f9fa;
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-        }
-
-        .day-section:hover {
-            transform: translateY(-5px);
-        }
-
-        .day-header {
-            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
-            color: white;
-            padding: 25px;
-            font-size: 2rem;
-            font-weight: bold;
-            text-align: center;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .day-content {
             padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
         }
 
-        .location {
-            background: linear-gradient(135deg, #f8f9ff 0%, #e6f3ff 100%);
-            border: 2px solid #e0e8ff;
-            border-radius: 12px;
-            margin-bottom: 25px;
-            padding: 25px;
+        .config-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
             transition: all 0.3s ease;
-            position: relative;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
             overflow: hidden;
         }
 
-        .location::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-            background: linear-gradient(45deg, #667eea, #764ba2);
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
         }
 
-        .location:hover {
-            transform: translateX(5px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+        .tab.active {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
         }
 
-        .location-header {
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .csv-upload {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .csv-upload:hover {
+            background: #f0f8ff;
+            border-color: #2980b9;
+        }
+
+        .csv-upload input[type="file"] {
+            display: none;
+        }
+
+        .csv-upload label {
+            cursor: pointer;
+            font-size: 18px;
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .invoice-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .invoice-item {
+            background: white;
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-            gap: 15px;
+            align-items: center;
+            transition: all 0.3s ease;
         }
 
-        .location-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #2d3748;
+        .invoice-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .invoice-info {
+            flex-grow: 1;
+        }
+
+        .invoice-info h4 {
+            color: #2c3e50;
             margin-bottom: 5px;
         }
 
-        .time-badge {
-            background: linear-gradient(45deg, #4facfe, #00f2fe);
-            color: white;
-            padding: 8px 16px;
+        .invoice-info p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
         }
 
-        .location-description {
-            color: #4a5568;
-            margin-bottom: 15px;
-            line-height: 1.7;
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
         }
 
-        .map-link {
-            display: inline-flex;
-            align-items: center;
-            background: linear-gradient(45deg, #48bb78, #38a169);
-            color: white;
-            text-decoration: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        .status-processing {
+            background: #cce7ff;
+            color: #0056b3;
         }
 
-        .map-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(72, 187, 120, 0.4);
-            background: linear-gradient(45deg, #38a169, #2f855a);
+        .status-success {
+            background: #d1edff;
+            color: #155724;
         }
 
-        .map-link::before {
-            content: '📍';
-            margin-right: 8px;
-            font-size: 1.1rem;
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
         }
 
-        .tips-section {
-            background: linear-gradient(135deg, #fff5e6 0%, #ffe0b3 100%);
-            border: 2px solid #ffd199;
+        .log-container {
+            background: #2c3e50;
+            color: #ecf0f1;
             border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
         }
 
-        .tips-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #d69e2e;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
         }
 
-        .tips-title::before {
-            content: '💡';
-            margin-right: 10px;
-            font-size: 1.5rem;
+        .log-success {
+            background: rgba(39, 174, 96, 0.2);
         }
 
-        .tips-list {
-            color: #744210;
-            line-height: 1.8;
+        .log-error {
+            background: rgba(231, 76, 60, 0.2);
         }
 
-        .weather-info {
-            background: linear-gradient(135deg, #e6fffa 0%, #b3f5e6 100%);
-            border: 2px solid #81e6d9;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            text-align: center;
+        .log-info {
+            background: rgba(52, 152, 219, 0.2);
         }
 
-        .weather-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #2c7a7b;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
         }
 
-        .weather-title::before {
-            content: '🌞';
-            margin-right: 10px;
-            font-size: 1.5rem;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2rem;
+            .form-row {
+                grid-template-columns: 1fr;
             }
             
-            .content {
-                padding: 20px;
+            .tabs {
+                flex-direction: column;
             }
             
-            .location-header {
+            .invoice-item {
                 flex-direction: column;
                 align-items: flex-start;
-            }
-            
-            .day-header {
-                font-size: 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            body {
-                padding: 10px;
-            }
-            
-            .header {
-                padding: 30px 15px;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            .day-content {
-                padding: 20px;
-            }
-            
-            .location {
-                padding: 20px;
             }
         }
     </style>
@@ -281,212 +316,484 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🏰 Guía de Gdansk</h1>
-            <p>Tu aventura perfecta de 2 días en la Perla del Báltico</p>
+            <h1>🧾 Gestor de Facturas Invopop</h1>
+            <p>Cumplimiento Verifactu - Integración API</p>
         </div>
 
-        <div class="content">
-            <div class="weather-info">
-                <div class="weather-title">Tiempo en Agosto</div>
-                <p style="color: #2c7a7b;">Temperaturas: 15-22°C | Lluvias ocasionales | Días largos con hasta 16 horas de luz</p>
+        <div class="main-content">
+            <!-- Configuración de API -->
+            <div class="config-section">
+                <h2>⚙️ Configuración de API</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="apiKey">API Key de Invopop:</label>
+                        <input type="password" id="apiKey" placeholder="Introduce tu API Key">
+                    </div>
+                    <div class="form-group">
+                        <label for="workflowId">ID del Workflow Verifactu:</label>
+                        <input type="text" id="workflowId" placeholder="ID del workflow">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="environment">Entorno:</label>
+                        <select id="environment">
+                            <option value="sandbox">Sandbox (Pruebas)</option>
+                            <option value="production">Producción</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webhookUrl">URL del Webhook (opcional):</label>
+                        <input type="url" id="webhookUrl" placeholder="https://tu-servidor.com/webhook">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="testConnection()">🔍 Probar Conexión</button>
             </div>
 
-            <div class="day-section">
-                <div class="day-header">DÍA 1 - Centro Histórico y Ciudad Principal</div>
-                <div class="day-content">
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Puerta Dorada (Złota Brama)</div>
-                            </div>
-                            <div class="time-badge">9:00 - 9:30</div>
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('csv')">📄 Importar CSV</div>
+                <div class="tab" onclick="switchTab('form')">📝 Nueva Factura</div>
+                <div class="tab" onclick="switchTab('list')">📋 Lista de Facturas</div>
+            </div>
+
+            <!-- Tab Content: CSV Import -->
+            <div id="csv-tab" class="tab-content active">
+                <div class="csv-upload">
+                    <input type="file" id="csvFile" accept=".csv" onchange="handleCSVUpload(event)">
+                    <label for="csvFile">
+                        📤 Haz clic aquí para subir tu archivo CSV<br>
+                        <small>Formato esperado: codigo, fecha_emision, proveedor_nombre, proveedor_nif, cliente_nombre, cliente_nif, concepto, importe, iva</small>
+                    </label>
+                </div>
+                
+                <div id="csvPreview" class="invoice-list" style="display: none;">
+                    <h3>Vista previa del CSV:</h3>
+                    <div id="csvData"></div>
+                    <button class="btn btn-success" onclick="processCsvInvoices()">🚀 Procesar Todas las Facturas</button>
+                </div>
+                
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Form -->
+            <div id="form-tab" class="tab-content">
+                <form id="invoiceForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="invoiceCode">Código de Factura:</label>
+                            <input type="text" id="invoiceCode" required>
                         </div>
-                        <div class="location-description">
-                            Comienza tu día en esta icónica puerta renacentista de 1612, entrada principal a la Ciudad Antigua. Es el punto de partida perfecto para explorar la Ruta Real.
+                        <div class="form-group">
+                            <label for="issueDate">Fecha de Emisión:</label>
+                            <input type="date" id="issueDate" required>
                         </div>
-                        <a href="https://maps.google.com/maps?q=Złota+Brama,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Calle Długa (Calle Larga)</div>
-                            </div>
-                            <div class="time-badge">9:30 - 10:30</div>
+                    <h3>🏢 Datos del Proveedor</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="supplierName">Nombre/Razón Social:</label>
+                            <input type="text" id="supplierName" required>
                         </div>
-                        <div class="location-description">
-                            Pasea por la calle más famosa de Gdansk, llena de casas burguesas coloridas y arquitectura gótica. Perfecta para fotos y compras de souvenirs.
+                        <div class="form-group">
+                            <label for="supplierTaxId">NIF/CIF:</label>
+                            <input type="text" id="supplierTaxId" required>
                         </div>
-                        <a href="https://maps.google.com/maps?q=Długa+Street,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Ayuntamiento de la Ciudad Principal</div>
-                            </div>
-                            <div class="time-badge">10:30 - 12:00</div>
+                    <h3>👤 Datos del Cliente</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerName">Nombre/Razón Social:</label>
+                            <input type="text" id="customerName" required>
                         </div>
-                        <div class="location-description">
-                            Visita este magnífico edificio gótico-renacentista con su impresionante torre de 81 metros. El museo interior alberga arte y artefactos históricos.
+                        <div class="form-group">
+                            <label for="customerTaxId">NIF/CIF:</label>
+                            <input type="text" id="customerTaxId" required>
                         </div>
-                        <a href="https://maps.google.com/maps?q=Ratusz+Głównego+Miasta,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
                     </div>
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Fuente de Neptuno</div>
-                            </div>
-                            <div class="time-badge">12:00 - 12:30</div>
+                    <h3>📋 Detalle de la Factura</h3>
+                    <div class="form-group">
+                        <label for="itemName">Concepto/Producto:</label>
+                        <input type="text" id="itemName" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemPrice">Precio (sin IVA):</label>
+                            <input type="number" id="itemPrice" step="0.01" required>
                         </div>
-                        <div class="location-description">
-                            El símbolo más famoso de Gdansk, esta fuente barroca de 1633 representa al dios del mar. Según la leyenda, aquí nació el famoso licor Goldwasser.
+                        <div class="form-group">
+                            <label for="itemQuantity">Cantidad:</label>
+                            <input type="number" id="itemQuantity" value="1" min="1" required>
                         </div>
-                        <a href="https://maps.google.com/maps?q=Fontanna+Neptuna,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
+                    </div>
+                    <div class="form-group">
+                        <label for="taxRate">Tipo de IVA:</label>
+                        <select id="taxRate" required>
+                            <option value="standard">Estándar (21%)</option>
+                            <option value="reduced">Reducido (10%)</option>
+                            <option value="super-reduced">Súper Reducido (4%)</option>
+                            <option value="zero">Exento (0%)</option>
+                        </select>
                     </div>
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Mercado Largo (Długi Targ)</div>
-                            </div>
-                            <div class="time-badge">12:30 - 13:30</div>
-                        </div>
-                        <div class="location-description">
-                            La plaza principal con las casas más hermosas de la ciudad. Disfruta de un almuerzo en una de las terrazas mientras admiras la arquitectura hanseática.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Długi+Targ,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
+                    <button type="submit" class="btn btn-success">🧾 Crear Factura</button>
+                    <button type="button" class="btn btn-warning" onclick="clearForm()">🗑️ Limpiar</button>
+                </form>
+            </div>
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Puerta Verde (Zielona Brama)</div>
-                            </div>
-                            <div class="time-badge">14:00 - 14:30</div>
-                        </div>
-                        <div class="location-description">
-                            Esta puerta manierista del siglo XVI conecta el Mercado Largo con el río Motława. Hoy alberga exposiciones y es sede del Museo Nacional de Gdansk.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Zielona+Brama,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
-
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Muelle Motława y Grúa Medieval</div>
-                            </div>
-                            <div class="time-badge">14:30 - 16:00</div>
-                        </div>
-                        <div class="location-description">
-                            Pasea por el histórico muelle y visita la grúa medieval más grande de Europa. Desde aquí tienes vistas espectaculares del río y la ciudad.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Żuraw,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
-
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Basílica de Santa María</div>
-                            </div>
-                            <div class="time-badge">16:30 - 18:00</div>
-                        </div>
-                        <div class="location-description">
-                            Una de las iglesias de ladrillo más grandes del mundo. Sube sus 400 escalones hasta la torre para disfrutar de vistas panorámicas de Gdansk.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Bazylika+Mariacka,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
-
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Calle Mariacka (Cena)</div>
-                            </div>
-                            <div class="time-badge">19:00 - 21:00</div>
-                        </div>
-                        <div class="location-description">
-                            Termina el día cenando en esta pintoresca calle adoquinada llena de joyerías de ámbar y restaurantes tradicionales. Prueba el pescado fresco del Báltico.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Ulica+Mariacka,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
+            <!-- Tab Content: Invoice List -->
+            <div id="list-tab" class="tab-content">
+                <div class="invoice-list">
+                    <h3>📋 Facturas Procesadas</h3>
+                    <div id="invoicesList">
+                        <p>No hay facturas procesadas aún.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="day-section">
-                <div class="day-header">DÍA 2 - Astilleros, Museo y Costa</div>
-                <div class="day-content">
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Centro Europeo Solidarność</div>
-                            </div>
-                            <div class="time-badge">9:00 - 11:30</div>
-                        </div>
-                        <div class="location-description">
-                            Museo interactivo dedicado al movimiento Solidaridad y la historia del siglo XX en Europa. Ubicado en los históricos Astilleros de Gdansk.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Europejskie+Centrum+Solidarności,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
+            <!-- Log Container -->
+            <div class="log-container" id="logContainer">
+                <div class="log-entry log-info">🚀 Sistema iniciado - Listo para procesar facturas</div>
+            </div>
+        </div>
+    </div>
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Monumento a los Caídos del Astillero</div>
-                            </div>
-                            <div class="time-badge">11:30 - 12:00</div>
-                        </div>
-                        <div class="location-description">
-                            Memorial de 42 metros dedicado a los trabajadores que murieron en 1970. Un lugar histórico importante para entender la Polonia moderna.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Pomnik+Poległych+Stoczniowców,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
+    <script>
+        // Variables globales
+        let apiConfig = {
+            apiKey: '',
+            workflowId: '',
+            environment: 'sandbox',
+            webhookUrl: ''
+        };
+        let csvData = [];
+        let processedInvoices = [];
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Museo del Ámbar</div>
-                            </div>
-                            <div class="time-badge">13:00 - 14:30</div>
-                        </div>
-                        <div class="location-description">
-                            Ubicado en la Torre de la Prisión, descubre la fascinante historia del "oro báltico". Gdansk es el centro mundial del comercio de ámbar.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Muzeum+Bursztynu,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
+        // Funciones de utilidad
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Fortaleza de Wisłoujście</div>
-                            </div>
-                            <div class="time-badge">15:00 - 16:30</div>
-                        </div>
-                        <div class="location-description">
-                            Fortaleza histórica en la desembocadura del río Vístula. Perfecta para un paseo relajante con vistas al mar Báltico.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Twierdza+Wisłoujście,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Playa de Brzeźno</div>
-                            </div>
-                            <div class="time-badge">17:00 - 19:00</div>
-                        </div>
-                        <div class="location-description">
-                            Relájate en esta amplia playa de arena con su famoso muelle de madera. En agosto, perfecta para un paseo al atardecer o incluso un baño.
-                        </div>
-                        <a href="https://maps.google.com/maps?q=Plaża+Brzeźno,+Gdańsk,+Polonia" class="map-link" target="_blank">Ver en Google Maps</a>
-                    </div>
+        function getApiBaseUrl() {
+            return apiConfig.environment === 'production' 
+                ? 'https://api.invopop.com/v1' 
+                : 'https://api.sandbox.invopop.com/v1';
+        }
 
-                    <div class="location">
-                        <div class="location-header">
-                            <div>
-                                <div class="location-title">Westerplatte</div>
-                            </div>
-                            <div class="time-badge">19:30 - 20:30</div>
-                        </div>
-                        <div class="location-description">
-                            Lugar donde comenzó la Segunda Guer
+        // Funciones de tabs
+        function switchTab(tabName) {
+            // Actualizar tabs activos
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+        }
+
+        // Función para probar conexión
+        async function testConnection() {
+            const apiKey = document.getElementById('apiKey').value;
+            const workflowId = document.getElementById('workflowId').value;
+            
+            if (!apiKey) {
+                log('❌ Error: Introduce tu API Key', 'error');
+                return;
+            }
+
+            apiConfig.apiKey = apiKey;
+            apiConfig.workflowId = workflowId;
+            apiConfig.environment = document.getElementById('environment').value;
+            apiConfig.webhookUrl = document.getElementById('webhookUrl').value;
+
+            try {
+                log('🔍 Probando conexión con Invopop...', 'info');
+                
+                const response = await fetch(`${getApiBaseUrl()}/silo/entries`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${apiConfig.apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    log('✅ Conexión exitosa con la API de Invopop', 'success');
+                } else {
+                    log(`❌ Error en la conexión: ${response.status} - ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error de conexión: ${error.message}`, 'error');
+            }
+        }
+
+        // Manejo de CSV
+        function handleCSVUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvContent = e.target.result;
+                parseCsv(csvContent);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCsv(csvContent) {
+            const lines = csvContent.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            csvData = [];
+
+            log(`📄 CSV cargado con ${lines.length - 1} facturas`, 'info');
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+                const invoice = {};
+                
+                headers.forEach((header, index) => {
+                    invoice[header] = values[index] || '';
+                });
+                
+                csvData.push(invoice);
+            }
+
+            displayCsvPreview();
+        }
+
+        function displayCsvPreview() {
+            const preview = document.getElementById('csvPreview');
+            const dataContainer = document.getElementById('csvData');
+            
+            dataContainer.innerHTML = '';
+            
+            csvData.forEach((invoice, index) => {
+                const item = document.createElement('div');
+                item.className = 'invoice-item';
+                item.innerHTML = `
+                    <div class="invoice-info">
+                        <h4>Factura: ${invoice.codigo || `#${index + 1}`}</h4>
+                        <p><strong>Cliente:</strong> ${invoice.cliente_nombre || 'N/A'} | <strong>Importe:</strong> €${invoice.importe || '0'}</p>
+                    </div>
+                    <div class="status-badge status-pending">Pendiente</div>
+                `;
+                dataContainer.appendChild(item);
+            });
+            
+            preview.style.display = 'block';
+        }
+
+        // Procesamiento de facturas CSV
+        async function processCsvInvoices() {
+            if (!apiConfig.apiKey) {
+                log('❌ Error: Configura primero tu API Key', 'error');
+                return;
+            }
+
+            if (csvData.length === 0) {
+                log('❌ Error: No hay datos CSV para procesar', 'error');
+                return;
+            }
+
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            progressBar.style.display = 'block';
+
+            log(`🚀 Iniciando procesamiento de ${csvData.length} facturas...`, 'info');
+
+            for (let i = 0; i < csvData.length; i++) {
+                const invoice = csvData[i];
+                const progress = ((i + 1) / csvData.length) * 100;
+                progressFill.style.width = `${progress}%`;
+
+                try {
+                    await processInvoice(invoice, `csv-${i}`);
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa entre llamadas
+                } catch (error) {
+                    log(`❌ Error procesando factura ${invoice.codigo || i}: ${error.message}`, 'error');
+                }
+            }
+
+            log('✅ Procesamiento de CSV completado', 'success');
+            updateInvoicesList();
+        }
+
+        // Crear factura desde formulario
+        document.getElementById('invoiceForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!apiConfig.apiKey) {
+                log('❌ Error: Configura primero tu API Key', 'error');
+                return;
+            }
+
+            const formData = {
+                codigo: document.getElementById('invoiceCode').value,
+                fecha_emision: document.getElementById('issueDate').value,
+                proveedor_nombre: document.getElementById('supplierName').value,
+                proveedor_nif: document.getElementById('supplierTaxId').value,
+                cliente_nombre: document.getElementById('customerName').value,
+                cliente_nif: document.getElementById('customerTaxId').value,
+                concepto: document.getElementById('itemName').value,
+                importe: document.getElementById('itemPrice').value,
+                cantidad: document.getElementById('itemQuantity').value,
+                iva: document.getElementById('taxRate').value
+            };
+
+            try {
+                await processInvoice(formData, 'form');
+                log('✅ Factura creada exitosamente desde formulario', 'success');
+                clearForm();
+                updateInvoicesList();
+            } catch (error) {
+                log(`❌ Error creando factura: ${error.message}`, 'error');
+            }
+        });
+
+        // Procesar una factura individual
+        async function processInvoice(invoiceData, source) {
+            const uuid = generateUUID();
+            
+            // Crear el objeto GOBO
+            const goblInvoice = {
+                "$schema": "https://gobl.org/draft-0/bill/invoice",
+                "code": invoiceData.codigo || `INV-${Date.now()}`,
+                "currency": "EUR",
+                "issue_date": invoiceData.fecha_emision || new Date().toISOString().split('T')[0],
+                "supplier": {
+                    "name": invoiceData.proveedor_nombre || "Mi Empresa",
+                    "tax_id": {
+                        "country": "ES",
+                        "code": invoiceData.proveedor_nif || "B12345678"
+                    }
+                },
+                "customer": {
+                    "name": invoiceData.cliente_nombre || "Cliente",
+                    "tax_id": {
+                        "country": "ES",
+                        "code": invoiceData.cliente_nif || "A87654321"
+                    }
+                },
+                "lines": [{
+                    "quantity": invoiceData.cantidad || "1",
+                    "item": {
+                        "name": invoiceData.concepto || "Producto/Servicio",
+                        "price": invoiceData.importe || "100.00"
+                    },
+                    "taxes": [{
+                        "cat": "VAT",
+                        "rate": invoiceData.iva || "standard"
+                    }]
+                }]
+            };
+
+            log(`📤 Enviando factura ${goblInvoice.code} al silo...`, 'info');
+
+            // Paso 1: Crear entrada en el silo
+            const siloResponse = await fetch(`${getApiBaseUrl()}/silo/entries/${uuid}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${apiConfig.apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: goblInvoice })
+            });
+
+            if (!siloResponse.ok) {
+                throw new Error(`Error al crear entrada en silo: ${siloResponse.status}`);
+            }
+
+            log(`✅ Factura ${goblInvoice.code} agregada al silo`, 'success');
+
+            // Paso 2: Crear job en workflow (si está configurado)
+            if (apiConfig.workflowId) {
+                log(`🔄 Enviando factura al workflow Verifactu...`, 'info');
+                
+                const jobResponse = await fetch(`${getApiBaseUrl()}/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiConfig.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        workflow: apiConfig.workflowId,
+                        silo_entry: uuid,
+                        webhook: apiConfig.webhookUrl || undefined
+                    })
+                });
+
+                if (!jobResponse.ok) {
+                    throw new Error(`Error al crear job: ${jobResponse.status}`);
+                }
+
+                log(`✅ Factura enviada al workflow Verifactu`, 'success');
+            }
+
+            // Agregar a la lista de facturas procesadas
+            processedInvoices.push({
+                uuid: uuid,
+                code: goblInvoice.code,
+                customer: goblInvoice.customer.name,
+                amount: goblInvoice.lines[0].item.price,
+                date: goblInvoice.issue_date,
+                status: 'processing',
+                source: source
+            });
+        }
+
+        function updateInvoicesList() {
+            const invoicesList = document.getElementById('invoicesList');
+            
+            if (processedInvoices.length === 0) {
+                invoicesList.innerHTML = '<p>No hay facturas procesadas aún.</p>';
+                return;
+            }
+            
+            invoicesList.innerHTML = '';
+            
+            processedInvoices.forEach(invoice => {
+                const item = document.createElement('div');
+                item.className = 'invoice-item';
+                item.innerHTML = `
+                    <div class="invoice-info">
+                        <h4>${invoice.code}</h4>
+                        <p><strong>Cliente:</strong> ${invoice.customer} | <strong>Fecha:</strong> ${invoice.date}</p>
+                        <p><strong>Importe:</strong> €${invoice.amount} | <strong>UUID:</strong> ${invoice.uuid}</p>
+                    </div>
+                    <div class="status-badge status-${invoice.status}">${invoice.status}</div>
+                `;
+                invoicesList.appendChild(item);
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('invoiceForm').reset();
+            document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
+            log('🎉 Aplicación cargada correctamente', 'success');
+        });
+    </script>
+</body>
+</html>
