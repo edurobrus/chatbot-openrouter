@@ -1,1 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Facturas Invopop - Verifactu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+        }
+
+        .config-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .csv-upload {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .csv-upload:hover {
+            background: #f0f8ff;
+            border-color: #2980b9;
+        }
+
+        .csv-upload input[type="file"] {
+            display: none;
+        }
+
+        .csv-upload label {
+            cursor: pointer;
+            font-size: 18px;
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .invoice-list {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .invoice-item {
+            background: white;
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .invoice-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .invoice-info {
+            flex-grow: 1;
+        }
+
+        .invoice-info h4 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .invoice-info p {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #cce7ff;
+            color: #0056b3;
+        }
+
+        .status-success {
+            background: #d1edff;
+            color: #155724;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .log-container {
+            background: #2c3e50;
+            color: #ecf0f1;
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .log-success {
+            background: rgba(39, 174, 96, 0.2);
+        }
+
+        .log-error {
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        .log-info {
+            background: rgba(52, 152, 219, 0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .invoice-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧾 Gestor de Facturas Invopop</h1>
+            <p>Cumplimiento Verifactu - Integración API</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Configuración de API -->
+            <div class="config-section">
+                <h2>⚙️ Configuración de API</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="apiKey">API Key de Invopop:</label>
+                        <input type="password" id="apiKey" placeholder="Introduce tu API Key">
+                    </div>
+                    <div class="form-group">
+                        <label for="workflowId">ID del Workflow Verifactu:</label>
+                        <input type="text" id="workflowId" placeholder="ID del workflow">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="environment">Entorno:</label>
+                        <select id="environment">
+                            <option value="sandbox">Sandbox (Pruebas)</option>
+                            <option value="production">Producción</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="webhookUrl">URL del Webhook (opcional):</label>
+                        <input type="url" id="webhookUrl" placeholder="https://tu-servidor.com/webhook">
+                        <small style="color: #7f8c8d; font-size: 12px;">
+                            💡 El webhook es opcional. Si no lo configuras, deberás consultar manualmente el estado de las facturas.
+                        </small>
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="testConnection()">🔍 Probar Conexión</button>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('csv')">📄 Importar CSV</div>
+                <div class="tab" onclick="switchTab('form')">📝 Nueva Factura</div>
+                <div class="tab" onclick="switchTab('list')">📋 Lista de Facturas</div>
+            </div>
+
+            <!-- Tab Content: CSV Import -->
+            <div id="csv-tab" class="tab-content active">
+                <div class="csv-upload">
+                    <input type="file" id="csvFile" accept=".csv" onchange="handleCSVUpload(event)">
+                    <label for="csvFile">
+                        📤 Haz clic aquí para subir tu archivo CSV<br>
+                        <small>Formato esperado: codigo, fecha_emision, proveedor_nombre, proveedor_nif, cliente_nombre, cliente_nif, concepto, importe, iva</small>
+                    </label>
+                </div>
+                
+                <div id="csvPreview" class="invoice-list" style="display: none;">
+                    <h3>Vista previa del CSV:</h3>
+                    <div id="csvData"></div>
+                    <button class="btn btn-success" onclick="processCsvInvoices()">🚀 Procesar Todas las Facturas</button>
+                </div>
+                
+                <div class="progress-bar" id="progressBar" style="display: none;">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+
+            <!-- Tab Content: Form -->
+            <div id="form-tab" class="tab-content">
+                <form id="invoiceForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="invoiceCode">Código de Factura:</label>
+                            <input type="text" id="invoiceCode" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="issueDate">Fecha de Emisión:</label>
+                            <input type="date" id="issueDate" required>
+                        </div>
+                    </div>
+
+                    <h3>🏢 Datos del Proveedor</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="supplierName">Nombre/Razón Social:</label>
+                            <input type="text" id="supplierName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplierTaxId">NIF/CIF:</label>
+                            <input type="text" id="supplierTaxId" required>
+                        </div>
+                    </div>
+
+                    <h3>👤 Datos del Cliente</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="customerName">Nombre/Razón Social:</label>
+                            <input type="text" id="customerName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customerTaxId">NIF/CIF:</label>
+                            <input type="text" id="customerTaxId" required>
+                        </div>
+                    </div>
+
+                    <h3>📋 Detalle de la Factura</h3>
+                    <div class="form-group">
+                        <label for="itemName">Concepto/Producto:</label>
+                        <input type="text" id="itemName" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="itemPrice">Precio (sin IVA):</label>
+                            <input type="number" id="itemPrice" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemQuantity">Cantidad:</label>
+                            <input type="number" id="itemQuantity" value="1" min="1" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="taxRate">Tipo de IVA:</label>
+                        <select id="taxRate" required>
+                            <option value="standard">Estándar (21%)</option>
+                            <option value="reduced">Reducido (10%)</option>
+                            <option value="super-reduced">Súper Reducido (4%)</option>
+                            <option value="zero">Exento (0%)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">🧾 Crear Factura</button>
+                    <button type="button" class="btn btn-warning" onclick="clearForm()">🗑️ Limpiar</button>
+                </form>
+            </div>
+
+            <!-- Tab Content: Invoice List -->
+            <div id="list-tab" class="tab-content">
+                <div class="invoice-list">
+                    <h3>📋 Facturas Procesadas</h3>
+                    <div style="background: #e8f4f8; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4>🎯 ¿Dónde están mis PDFs y códigos QR?</h4>
+                        <p><strong>1.</strong> Haz clic en "🔍 Ver Estado" de cualquier factura</p>
+                        <p><strong>2.</strong> Si el workflow terminó, verás enlaces de descarga para:</p>
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>📄 <strong>PDF con QR de Verifactu</strong> (el código QR aparece en el PDF)</li>
+                            <li>🏷️ <strong>XML para Hacienda</strong></li>
+                            <li>📎 <strong>Otros archivos del workflow</strong></li>
+                        </ul>
+                        <p><strong>3.</strong> Si no ves archivos, espera unos minutos (el workflow aún está procesando)</p>
+                    </div>
+                    <div id="invoicesList">
+                        <p>No hay facturas procesadas aún.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Container -->
+            <div class="log-container" id="logContainer">
+                <div class="log-entry log-info">🚀 Sistema iniciado - Listo para procesar facturas</div>
+            </div>
+        </div>
+    </div>
+<script>
+        // Variables globales
+        var apiConfig = {
+            apiKey: '',
+            workflowId: '',
+            environment: 'sandbox',
+            webhookUrl: ''
+        };
+        var csvData = [];
+        var processedInvoices = [];
+
+        // Funciones de utilidad
+        function log(message, type) {
+            if (!type) type = 'info';
+            var logContainer = document.getElementById('logContainer');
+            var timestamp = new Date().toLocaleTimeString();
+            var logEntry = document.createElement('div');
+            logEntry.className = 'log-entry log-' + type;
+            logEntry.innerHTML = '[' + timestamp + '] ' + message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0;
+                var v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function getApiBaseUrl() {
+            return apiConfig.environment === 'production' 
+                ? 'https://api.invopop.com/v1' 
+                : 'https://api.sandbox.invopop.com/v1';
+        }
+
+        // Funciones de tabs
+        function switchTab(tabName) {
+            // Actualizar tabs activos
+            var tabs = document.querySelectorAll('.tab');
+            var contents = document.querySelectorAll('.tab-content');
+            
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove('active');
+            }
+            for (var i = 0; i < contents.length; i++) {
+                contents[i].classList.remove('active');
+            }
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+        }
+
+        // Función para probar conexión
+        function testConnection() {
+            var apiKey = document.getElementById('apiKey').value;
+            var workflowId = document.getElementById('workflowId').value;
+            
+            if (!apiKey) {
+                log('❌ Error: Introduce tu API Key', 'error');
+                return;
+            }
+
+            apiConfig.apiKey = apiKey;
+            apiConfig.workflowId = workflowId;
+            apiConfig.environment = document.getElementById('environment').value;
+            apiConfig.webhookUrl = document.getElementById('webhookUrl').value;
+
+            log('🔍 Probando conexión con Invopop...', 'info');
+            
+            fetch(getApiBaseUrl() + '/silo/entries', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + apiConfig.apiKey,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                if (response.ok) {
+                    log('✅ Conexión exitosa con la API de Invopop', 'success');
+                } else {
+                    log('❌ Error en la conexión: ' + response.status + ' - ' + response.statusText, 'error');
+                }
+            })
+            .catch(function(error) {
+                log('❌ Error de conexión: ' + error.message, 'error');
+            });
+        }
+
+        // Función para verificar estado de factura y obtener archivos
+        function checkInvoiceStatus(uuid, invoiceCode) {
+            if (!apiConfig.apiKey) {
+                log('❌ Error: API Key no configurada', 'error');
+                return;
+            }
+
+            log('🔍 Consultando estado de factura ' + invoiceCode + '...', 'info');
+            
+            fetch(getApiBaseUrl() + '/silo/entries/' + uuid, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + apiConfig.apiKey,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error('Error al consultar factura: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(function(data) {
+                log('✅ Estado obtenido para factura ' + invoiceCode, 'success');
+                displayInvoiceDetails(data, invoiceCode);
+            })
+            .catch(function(error) {
+                log('❌ Error consultando factura ' + invoiceCode + ': ' + error.message, 'error');
+            });
+        }
+
+        // Función para mostrar detalles de la factura
+        function displayInvoiceDetails(data, invoiceCode) {
+            var modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+            
+            var attachmentsHtml = '';
+            if (data.attachments && data.attachments.length > 0) {
+                attachmentsHtml = '<h4>📎 Archivos disponibles:</h4><ul>';
+                for (var i = 0; i < data.attachments.length; i++) {
+                    var attachment = data.attachments[i];
+                    var icon = attachment.type.includes('pdf') ? '📄' : 
+                               attachment.type.includes('xml') ? '🏷️' : '📎';
+                    attachmentsHtml += '<li style="margin: 10px 0;">' +
+                        icon + ' <strong>' + (attachment.filename || attachment.type) + '</strong>' +
+                        '<br><small>Tipo: ' + attachment.type + '</small>' +
+                        '<br><a href="' + attachment.url + '" target="_blank" class="btn" style="font-size: 12px; padding: 5px 10px;">⬇️ Descargar</a>' +
+                        '</li>';
+                }
+                attachmentsHtml += '</ul>';
+            } else {
+                attachmentsHtml = '<p style="color: #f39c12;">⏳ Los archivos aún se están procesando. Intenta de nuevo en unos minutos.</p>';
+            }
+
+            var workflowsHtml = '';
+            if (data.workflows && data.workflows.length > 0) {
+                workflowsHtml = '<h4>🔄 Estado del Workflow:</h4><ul>';
+                for (var i = 0; i < data.workflows.length; i++) {
+                    var workflow = data.workflows[i];
+                    var statusIcon = workflow.status === 'complete' ? '✅' : 
+                                    workflow.status === 'error' ? '❌' : '⏳';
+                    workflowsHtml += '<li style="margin: 5px 0;">' +
+                        statusIcon + ' <strong>' + (workflow.name || 'Workflow') + '</strong>: ' + workflow.status +
+                        '</li>';
+                }
+                workflowsHtml += '</ul>';
+            }
+
+            modal.innerHTML = 
+                '<div style="background: white; border-radius: 15px; padding: 30px; max-width: 600px; width: 100%; max-height: 80%; overflow-y: auto;">' +
+                    '<h2 style="margin-bottom: 20px; color: #2c3e50;">📋 Detalles de Factura: ' + invoiceCode + '</h2>' +
+                    '<p><strong>UUID:</strong> ' + data.uuid + '</p>' +
+                    '<p><strong>Fecha de creación:</strong> ' + new Date(data.created_at).toLocaleString() + '</p>' +
+                    '<p><strong>Última actualización:</strong> ' + new Date(data.updated_at).toLocaleString() + '</p>' +
+                    workflowsHtml +
+                    '<div style="margin: 20px 0;">' + attachmentsHtml + '</div>' +
+                    '<div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 20px 0;">' +
+                        '<h4>💡 ¿Dónde está mi código QR?</h4>' +
+                        '<p>El código QR de Verifactu aparece automáticamente en el PDF generado. Descarga el archivo PDF para verlo.</p>' +
+                        '<p>Si no ves archivos disponibles, el workflow aún está procesando. Espera unos minutos y vuelve a consultar.</p>' +
+                    '</div>' +
+                    '<button onclick="closeModal()" class="btn btn-danger">❌ Cerrar</button>' +
+                '</div>';
+            
+            document.body.appendChild(modal);
+            
+            // Función para cerrar modal
+            window.closeModal = function() {
+                document.body.removeChild(modal);
+            };
+            
+            // Cerrar al hacer click fuera
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+        }
+
+        // Manejo de CSV
+        function handleCSVUpload(event) {
+            var file = event.target.files[0];
+            if (!file) return;
+
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var csvContent = e.target.result;
+                parseCsv(csvContent);
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCsv(csvContent) {
+            var lines = csvContent.trim().split('\n');
+            var headers = lines[0].split(',');
+            for (var i = 0; i < headers.length; i++) {
+                headers[i] = headers[i].trim();
+            }
+            csvData = [];
+
+            log('📄 CSV cargado con ' + (lines.length - 1) + ' facturas', 'info');
+
+            for (var i = 1; i < lines.length; i++) {
+                var values = lines[i].split(',');
+                for (var j = 0; j < values.length; j++) {
+                    values[j] = values[j].trim().replace(/"/g, '');
+                }
+                var invoice = {};
+                
+                for (var k = 0; k < headers.length; k++) {
+                    invoice[headers[k]] = values[k] || '';
+                }
+                
+                csvData.push(invoice);
+            }
+
+            displayCsvPreview();
+        }
+
+        function displayCsvPreview() {
+            var preview = document.getElementById('csvPreview');
+            var dataContainer = document.getElementById('csvData');
+            
+            dataContainer.innerHTML = '';
+            
+            for (var i = 0; i < csvData.length; i++) {
+                var invoice = csvData[i];
+                var item = document.createElement('div');
+                item.className = 'invoice-item';
+                item.innerHTML = 
+                    '<div class="invoice-info">' +
+                        '<h4>Factura: ' + (invoice.codigo || ('#' + (i + 1))) + '</h4>' +
+                        '<p><strong>Cliente:</strong> ' + (invoice.cliente_nombre || 'N/A') + ' | <strong>Importe:</strong> €' + (invoice.importe || '0') + '</p>' +
+                    '</div>' +
+                    '<div class="status-badge status-pending">Pendiente</div>';
+                dataContainer.appendChild(item);
+            }
+            
+            preview.style.display = 'block';
+        }
+
+        // Procesamiento de facturas CSV
+        function processCsvInvoices() {
+            if (!apiConfig.apiKey) {
+                log('❌ Error: Configura primero tu API Key', 'error');
+                return;
+            }
+
+            if (csvData.length === 0) {
+                log('❌ Error: No hay datos CSV para procesar', 'error');
+                return;
+            }
+
+            var progressBar = document.getElementById('progressBar');
+            var progressFill = document.getElementById('progressFill');
+            progressBar.style.display = 'block';
+
+            log('🚀 Iniciando procesamiento de ' + csvData.length + ' facturas...', 'info');
+
+            processNextInvoice(0, progressFill);
+        }
+
+        function processNextInvoice(index, progressFill) {
+            if (index >= csvData.length) {
+                log('✅ Procesamiento de CSV completado', 'success');
+                updateInvoicesList();
+                return;
+            }
+
+            var invoice = csvData[index];
+            var progress = ((index + 1) / csvData.length) * 100;
+            progressFill.style.width = progress + '%';
+
+            processInvoice(invoice, 'csv-' + index)
+                .then(function() {
+                    setTimeout(function() {
+                        processNextInvoice(index + 1, progressFill);
+                    }, 1000);
+                })
+                .catch(function(error) {
+                    log('❌ Error procesando factura ' + (invoice.codigo || index) + ': ' + error.message, 'error');
+                    setTimeout(function() {
+                        processNextInvoice(index + 1, progressFill);
+                    }, 1000);
+                });
+        }
+
+        // Crear factura desde formulario
+        function initForm() {
+            document.getElementById('invoiceForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                if (!apiConfig.apiKey) {
+                    log('❌ Error: Configura primero tu API Key', 'error');
+                    return;
+                }
+
+                var formData = {
+                    codigo: document.getElementById('invoiceCode').value,
+                    fecha_emision: document.getElementById('issueDate').value,
+                    proveedor_nombre: document.getElementById('supplierName').value,
+                    proveedor_nif: document.getElementById('supplierTaxId').value,
+                    cliente_nombre: document.getElementById('customerName').value,
+                    cliente_nif: document.getElementById('customerTaxId').value,
+                    concepto: document.getElementById('itemName').value,
+                    importe: document.getElementById('itemPrice').value,
+                    cantidad: document.getElementById('itemQuantity').value,
+                    iva: document.getElementById('taxRate').value
+                };
+
+                processInvoice(formData, 'form')
+                    .then(function() {
+                        log('✅ Factura creada exitosamente desde formulario', 'success');
+                        clearForm();
+                        updateInvoicesList();
+                    })
+                    .catch(function(error) {
+                        log('❌ Error creando factura: ' + error.message, 'error');
+                    });
+            });
+        }
+
+        // Procesar una factura individual
+        function processInvoice(invoiceData, source) {
+            return new Promise(function(resolve, reject) {
+                var uuid = generateUUID();
+                
+                // Crear el objeto GOBO
+                var goblInvoice = {
+                    "$schema": "https://gobl.org/draft-0/bill/invoice",
+                    "code": invoiceData.codigo || ('INV-' + Date.now()),
+                    "currency": "EUR",
+                    "issue_date": invoiceData.fecha_emision || new Date().toISOString().split('T')[0],
+                    "supplier": {
+                        "name": invoiceData.proveedor_nombre || "Mi Empresa",
+                        "tax_id": {
+                            "country": "ES",
+                            "code": invoiceData.proveedor_nif || "B12345678"
+                        }
+                    },
+                    "customer": {
+                        "name": invoiceData.cliente_nombre || "Cliente",
+                        "tax_id": {
+                            "country": "ES",
+                            "code": invoiceData.cliente_nif || "A87654321"
+                        }
+                    },
+                    "lines": [{
+                        "quantity": invoiceData.cantidad || "1",
+                        "item": {
+                            "name": invoiceData.concepto || "Producto/Servicio",
+                            "price": invoiceData.importe || "100.00"
+                        },
+                        "taxes": [{
+                            "cat": "VAT",
+                            "rate": invoiceData.iva || "standard"
+                        }]
+                    }]
+                };
+
+                log('📤 Enviando factura ' + goblInvoice.code + ' al silo...', 'info');
+
+                // Paso 1: Crear entrada en el silo
+                fetch(getApiBaseUrl() + '/silo/entries/' + uuid, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + apiConfig.apiKey,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ data: goblInvoice })
+                })
+                .then(function(siloResponse) {
+                    if (!siloResponse.ok) {
+                        throw new Error('Error al crear entrada en silo: ' + siloResponse.status);
+                    }
+
+                    log('✅ Factura ' + goblInvoice.code + ' agregada al silo', 'success');
+
+                    // Paso 2: Crear job en workflow (si está configurado)
+                    if (apiConfig.workflowId) {
+                        log('🔄 Enviando factura al workflow Verifactu...', 'info');
+                        
+                        var jobPayload = {
+                            workflow: apiConfig.workflowId,
+                            silo_entry: uuid
+                        };
+                        
+                        // Agregar webhook solo si está configurado
+                        if (apiConfig.webhookUrl && apiConfig.webhookUrl.trim() !== '') {
+                            jobPayload.webhook = apiConfig.webhookUrl;
+                        }
+
+                        return fetch(getApiBaseUrl() + '/jobs', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': 'Bearer ' + apiConfig.apiKey,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(jobPayload)
+                        });
+                    } else {
+                        return Promise.resolve({ ok: true });
+                    }
+                })
+                .then(function(jobResponse) {
+                    if (apiConfig.workflowId) {
+                        if (!jobResponse.ok) {
+                            throw new Error('Error al crear job: ' + jobResponse.status);
+                        }
+                        log('✅ Factura enviada al workflow Verifactu', 'success');
+                    }
+
+                    // Agregar a la lista de facturas procesadas
+                    processedInvoices.push({
+                        uuid: uuid,
+                        code: goblInvoice.code,
+                        customer: goblInvoice.customer.name,
+                        amount: goblInvoice.lines[0].item.price,
+                        date: goblInvoice.issue_date,
+                        status: 'processing',
+                        source: source
+                    });
+
+                    resolve();
+                })
+                .catch(function(error) {
+                    reject(error);
+                });
+            });
+        }
+
+        function updateInvoicesList() {
+            var invoicesList = document.getElementById('invoicesList');
+            
+            if (processedInvoices.length === 0) {
+                invoicesList.innerHTML = '<p>No hay facturas procesadas aún.</p>';
+                return;
+            }
+            
+            invoicesList.innerHTML = '';
+            
+            for (var i = 0; i < processedInvoices.length; i++) {
+                var invoice = processedInvoices[i];
+                var item = document.createElement('div');
+                item.className = 'invoice-item';
+                item.innerHTML = 
+                    '<div class="invoice-info">' +
+                        '<h4>' + invoice.code + '</h4>' +
+                        '<p><strong>Cliente:</strong> ' + invoice.customer + ' | <strong>Fecha:</strong> ' + invoice.date + '</p>' +
+                        '<p><strong>Importe:</strong> €' + invoice.amount + ' | <strong>UUID:</strong> ' + invoice.uuid + '</p>' +
+                    '</div>' +
+                    '<div class="status-badge status-' + invoice.status + '">' + invoice.status + '</div>' +
+                    '<button class="btn" onclick="checkInvoiceStatus(\'' + invoice.uuid + '\', \'' + invoice.code + '\')">🔍 Ver Estado</button>';
+                invoicesList.appendChild(item);
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('invoiceForm').reset();
+            document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('issueDate').value = new Date().toISOString().split('T')[0];
+            initForm();
+            log('🎉 Aplicación cargada correctamente', 'success');
+        });
+    </script>
+</body>
+</html>
